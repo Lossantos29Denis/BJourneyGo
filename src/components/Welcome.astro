@@ -1,210 +1,474 @@
 ---
-import astroLogo from '../assets/astro.svg';
 import background from '../assets/background.svg';
 ---
 
-<div id="container">
-	<img id="background" src={background.src} alt="" fetchpriority="high" />
-	<main>
-		<section id="hero">
-			<a href="https://astro.build"
-				><img src={astroLogo.src} width="115" height="48" alt="Astro Homepage" /></a
-			>
-			<h1>
-				To get started, open the <code><pre>src/pages</pre></code> directory in your project.
-			</h1>
-			<section id="links">
-				<a class="button" href="https://docs.astro.build">Read our docs</a>
-				<a href="https://astro.build/chat"
-					>Join our Discord <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36"
-						><path
-							fill="currentColor"
-							d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45 65.69C36.18 65.69 31 60 31 53s5-12.74 11.43-12.74S54 46 53.89 53s-5.05 12.69-11.44 12.69Zm42.24 0C78.41 65.69 73.25 60 73.25 53s5-12.74 11.44-12.74S96.23 46 96.12 53s-5.04 12.69-11.43 12.69Z"
-						></path></svg
-					>
-				</a>
-			</section>
-		</section>
-	</main>
+<section class="hero">
+  <img class="hero-bg" src={background.src} alt="decorative background" loading="lazy" fetchpriority="low" />
+  <div class="container hero-inner">
+	<div class="hero-content">
+	  <div class="hero-badge">🚌 Viajes cómodos y seguros</div>
+	  <h1>Viaja con <span class="highlight">BJourneyGo</span></h1>
+	  <p class="lead">Descubre la forma más cómoda, rápida y segura de viajar. Reserva tus billetes en línea y disfruta de un servicio de primera clase.</p>
+	  <div class="cta">
+		<a href="/comprar" class="btn-primary">
+		  <span>Comprar billetes</span>
+		  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+		  </svg>
+		</a>
+		<a href="#servicios" class="btn-secondary">
+		  <span>Ver servicios</span>
+		</a>
+	  </div>
+	  <div class="hero-stats">
+		<div class="stat">
+		  <div class="stat-number">500K+</div>
+		  <div class="stat-label">Viajeros felices</div>
+		</div>
+		<div class="stat">
+		  <div class="stat-number">50+</div>
+		  <div class="stat-label">Destinos</div>
+		</div>
+		<div class="stat">
+		  <div class="stat-number">4.9★</div>
+		  <div class="stat-label">Valoración</div>
+		</div>
+	  </div>
+	</div>
+	<aside class="hero-visual">
+	  <div class="hero-card floating">
+		<div class="card-icon">🎫</div>
+		<h3>Reserva instantánea</h3>
+		<p>Confirma tu viaje en segundos con nuestro sistema de reservas en línea.</p>
+		<div class="card-feature">✓ Sin colas</div>
+		<div class="card-feature">✓ Confirmación inmediata</div>
+	  </div>
+	</aside>
+  </div>
+</section>
 
-	<a href="https://astro.build/blog/astro-5/" id="news" class="box">
-		<svg width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"
-			><path
-				d="M24.667 12c1.333 1.414 2 3.192 2 5.334 0 4.62-4.934 5.7-7.334 12C18.444 28.567 18 27.456 18 26c0-4.642 6.667-7.053 6.667-14Zm-5.334-5.333c1.6 1.65 2.4 3.43 2.4 5.333 0 6.602-8.06 7.59-6.4 17.334C13.111 27.787 12 25.564 12 22.666c0-4.434 7.333-8 7.333-16Zm-6-5.333C15.111 3.555 16 5.556 16 7.333c0 8.333-11.333 10.962-5.333 22-3.488-.774-6-4-6-8 0-8.667 8.666-10 8.666-20Z"
-				fill="#111827"></path></svg
-		>
-		<h2>What's New in Astro 5.0?</h2>
-		<p>
-			From content layers to server islands, click to learn more about the new features and
-			improvements in Astro 5.0
-		</p>
-	</a>
-</div>
+<section id="servicios" class="services">
+  <div class="container">
+	<div class="section-header">
+	  <h2>¿Por qué elegir BJourneyGo?</h2>
+	  <p class="section-subtitle">Ofrecemos la mejor experiencia de viaje con servicios diseñados para tu comodidad</p>
+	</div>
+	<div class="services-grid">
+	  <article class="service-card">
+		<div class="service-icon">🛡️</div>
+		<h3>Seguridad garantizada</h3>
+		<p>Viaja con total tranquilidad. Nuestros conductores están certificados y nuestros vehículos pasan rigurosas inspecciones.</p>
+	  </article>
+	  <article class="service-card">
+		<div class="service-icon">💺</div>
+		<h3>Confort premium</h3>
+		<p>Asientos reclinables, aire acondicionado, WiFi gratuito y entretenimiento a bordo en todos nuestros autobuses.</p>
+	  </article>
+	  <article class="service-card">
+		<div class="service-icon">⚡</div>
+		<h3>Puntualidad</h3>
+		<p>Respetamos tu tiempo. El 98% de nuestros viajes salen y llegan a la hora programada.</p>
+	  </article>
+	  <article class="service-card">
+		<div class="service-icon">💳</div>
+		<h3>Precios accesibles</h3>
+		<p>Tarifas competitivas sin sorpresas. Descuentos especiales para estudiantes, seniors y grupos.</p>
+	  </article>
+	  <article class="service-card">
+		<div class="service-icon">📱</div>
+		<h3>App móvil</h3>
+		<p>Gestiona tus reservas, consulta horarios y recibe notificaciones en tiempo real desde tu smartphone.</p>
+	  </article>
+	  <article class="service-card">
+		<div class="service-icon">🎧</div>
+		<h3>Soporte 24/7</h3>
+		<p>Nuestro equipo de atención al cliente está disponible en todo momento para ayudarte.</p>
+	  </article>
+	</div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+	<div class="cta-content">
+	  <h2>¿Listo para tu próximo viaje?</h2>
+	  <p>Reserva ahora y obtén un 15% de descuento en tu primera compra</p>
+	  <a href="/comprar" class="btn-primary large">
+		<span>Reservar ahora</span>
+		<svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+		  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>
+	  </a>
+	</div>
+  </div>
+</section>
 
 <style>
-	#background {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-		filter: blur(100px);
-	}
+  /* Hero Section */
+  .hero {
+	position: relative;
+	padding: 5rem 0 4rem;
+	overflow: hidden;
+	background: linear-gradient(180deg, #fafaf9 0%, #fff 100%);
+  }
 
-	#container {
-		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
-		height: 100%;
-	}
+  .hero-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0.03;
+	filter: blur(60px);
+	pointer-events: none;
+  }
 
-	main {
-		height: 100%;
-		display: flex;
-		justify-content: center;
-	}
+  .container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 2rem;
+  }
 
-	#hero {
-		display: flex;
-		align-items: start;
-		flex-direction: column;
-		justify-content: center;
-		padding: 16px;
+  .hero-inner {
+	display: grid;
+	grid-template-columns: 1.2fr 1fr;
+	gap: 4rem;
+	align-items: center;
+	position: relative;
+  }
+
+  .hero-badge {
+	display: inline-block;
+	background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+	color: #ea580c;
+	padding: 0.5rem 1rem;
+	border-radius: 50px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 1.5rem;
+	border: 2px solid #fdba74;
+  }
+
+  h1 {
+	font-size: 3.5rem;
+	line-height: 1.1;
+	margin: 0 0 1.5rem;
+	color: #0f172a;
+	font-weight: 900;
+	letter-spacing: -1.5px;
+  }
+
+  .highlight {
+	color: transparent;
+	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+  }
+
+  .lead {
+	font-size: 1.25rem;
+	line-height: 1.7;
+	color: #64748b;
+	margin: 0 0 2rem;
+	max-width: 560px;
+  }
+
+  .cta {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 3rem;
+	flex-wrap: wrap;
+  }
+
+  .btn-primary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	color: white;
+	padding: 1rem 2rem;
+	border-radius: 12px;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 1rem;
+	transition: all 0.3s ease;
+	box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
+  }
+
+  .btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 15px 40px rgba(249, 115, 22, 0.4);
+  }
+
+  .btn-primary.large {
+	padding: 1.25rem 2.5rem;
+	font-size: 1.125rem;
+  }
+
+  .btn-secondary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: white;
+	color: #334155;
+	padding: 1rem 2rem;
+	border-radius: 12px;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 1rem;
+	transition: all 0.3s ease;
+	border: 2px solid #e2e8f0;
+  }
+
+  .btn-secondary:hover {
+	background: #f8fafc;
+	border-color: #cbd5e1;
+  }
+
+  .hero-stats {
+	display: flex;
+	gap: 3rem;
+	padding-top: 2rem;
+	border-top: 1px solid #e2e8f0;
+  }
+
+  .stat {
+	text-align: left;
+  }
+
+  .stat-number {
+	font-size: 2rem;
+	font-weight: 800;
+	color: #0f172a;
+	margin-bottom: 0.25rem;
+	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+  }
+
+  .stat-label {
+	font-size: 0.875rem;
+	color: #64748b;
+	font-weight: 500;
+  }
+
+  .hero-visual {
+	position: relative;
+  }
+
+  .hero-card {
+	background: white;
+	border-radius: 24px;
+	padding: 2rem;
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08), 0 10px 25px rgba(249, 115, 22, 0.06);
+	border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .floating {
+	animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+	0%, 100% { transform: translateY(0px); }
+	50% { transform: translateY(-20px); }
+  }
+
+  .card-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+  }
+
+  .hero-card h3 {
+	font-size: 1.5rem;
+	color: #0f172a;
+	margin: 0 0 0.75rem;
+	font-weight: 700;
+  }
+
+  .hero-card p {
+	color: #64748b;
+	line-height: 1.6;
+	margin-bottom: 1.25rem;
+  }
+
+  .card-feature {
+	color: #059669;
+	font-weight: 600;
+	font-size: 0.9rem;
+	margin: 0.5rem 0;
+  }
+
+  /* Services Section */
+  .services {
+	padding: 5rem 0;
+	background: linear-gradient(180deg, #fff 0%, #fafaf9 100%);
+  }
+
+  .section-header {
+	text-align: center;
+	margin-bottom: 4rem;
+  }
+
+  .section-header h2 {
+	font-size: 2.5rem;
+	color: #0f172a;
+	margin: 0 0 1rem;
+	font-weight: 800;
+	letter-spacing: -1px;
+  }
+
+  .section-subtitle {
+	font-size: 1.125rem;
+	color: #64748b;
+	max-width: 600px;
+	margin: 0 auto;
+  }
+
+  .services-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2rem;
+  }
+
+  .service-card {
+	background: white;
+	padding: 2rem;
+	border-radius: 20px;
+	border: 1px solid #e2e8f0;
+	transition: all 0.3s ease;
+  }
+
+  .service-card:hover {
+	transform: translateY(-8px);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+	border-color: #f97316;
+  }
+
+  .service-icon {
+	font-size: 2.5rem;
+	margin-bottom: 1.25rem;
+  }
+
+  .service-card h3 {
+	font-size: 1.25rem;
+	color: #0f172a;
+	margin: 0 0 0.75rem;
+	font-weight: 700;
+  }
+
+  .service-card p {
+	color: #64748b;
+	line-height: 1.6;
+	margin: 0;
+  }
+
+  /* CTA Section */
+  .cta-section {
+	padding: 5rem 0;
+	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	position: relative;
+	overflow: hidden;
+  }
+
+  .cta-section::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .cta-content {
+	text-align: center;
+	position: relative;
+	z-index: 1;
+  }
+
+  .cta-content h2 {
+	font-size: 2.75rem;
+	color: white;
+	margin: 0 0 1rem;
+	font-weight: 800;
+	letter-spacing: -1px;
+  }
+
+  .cta-content p {
+	font-size: 1.25rem;
+	color: rgba(255, 255, 255, 0.9);
+	margin: 0 0 2rem;
+  }
+
+  .cta-content .btn-primary {
+	background: white;
+	color: #ea580c;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .cta-content .btn-primary:hover {
+	transform: translateY(-2px) scale(1.05);
+	box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+	.hero-inner {
+	  grid-template-columns: 1fr;
+	  gap: 3rem;
 	}
 
 	h1 {
-		font-size: 22px;
-		margin-top: 0.25em;
+	  font-size: 2.5rem;
 	}
 
-	#links {
-		display: flex;
-		gap: 16px;
+	.hero-stats {
+	  gap: 2rem;
 	}
 
-	#links a {
-		display: flex;
-		align-items: center;
-		padding: 10px 12px;
-		color: #111827;
-		text-decoration: none;
-		transition: color 0.2s;
+	.services-grid {
+	  grid-template-columns: repeat(2, 1fr);
+	}
+  }
+
+  @media (max-width: 640px) {
+	.hero {
+	  padding: 3rem 0 2rem;
 	}
 
-	#links a:hover {
-		color: rgb(78, 80, 86);
+	h1 {
+	  font-size: 2rem;
 	}
 
-	#links a svg {
-		height: 1em;
-		margin-left: 8px;
+	.lead {
+	  font-size: 1rem;
 	}
 
-	#links a.button {
-		color: white;
-		background: linear-gradient(83.21deg, #3245ff 0%, #bc52ee 100%);
-		box-shadow:
-			inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-			inset 0 -2px 0 rgba(0, 0, 0, 0.24);
-		border-radius: 10px;
+	.cta {
+	  flex-direction: column;
 	}
 
-	#links a.button:hover {
-		color: rgb(230, 230, 230);
-		box-shadow: none;
+	.btn-primary, .btn-secondary {
+	  width: 100%;
+	  justify-content: center;
 	}
 
-	pre {
-		font-family:
-			ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono',
-			monospace;
-		font-weight: normal;
-		background: linear-gradient(14deg, #d83333 0%, #f041ff 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		margin: 0;
+	.hero-stats {
+	  flex-direction: column;
+	  gap: 1.5rem;
 	}
 
-	h2 {
-		margin: 0 0 1em;
-		font-weight: normal;
-		color: #111827;
-		font-size: 20px;
+	.services-grid {
+	  grid-template-columns: 1fr;
 	}
 
-	p {
-		color: #4b5563;
-		font-size: 16px;
-		line-height: 24px;
-		letter-spacing: -0.006em;
-		margin: 0;
+	.section-header h2 {
+	  font-size: 2rem;
 	}
 
-	code {
-		display: inline-block;
-		background:
-			linear-gradient(66.77deg, #f3cddd 0%, #f5cee7 100%) padding-box,
-			linear-gradient(155deg, #d83333 0%, #f041ff 18%, #f5cee7 45%) border-box;
-		border-radius: 8px;
-		border: 1px solid transparent;
-		padding: 6px 8px;
+	.cta-content h2 {
+	  font-size: 2rem;
 	}
-
-	.box {
-		padding: 16px;
-		background: rgba(255, 255, 255, 1);
-		border-radius: 16px;
-		border: 1px solid white;
-	}
-
-	#news {
-		position: absolute;
-		bottom: 16px;
-		right: 16px;
-		max-width: 300px;
-		text-decoration: none;
-		transition: background 0.2s;
-		backdrop-filter: blur(50px);
-	}
-
-	#news:hover {
-		background: rgba(255, 255, 255, 0.55);
-	}
-
-	@media screen and (max-height: 368px) {
-		#news {
-			display: none;
-		}
-	}
-
-	@media screen and (max-width: 768px) {
-		#container {
-			display: flex;
-			flex-direction: column;
-		}
-
-		#hero {
-			display: block;
-			padding-top: 10%;
-		}
-
-		#links {
-			flex-wrap: wrap;
-		}
-
-		#links a.button {
-			padding: 14px 18px;
-		}
-
-		#news {
-			right: 16px;
-			left: 16px;
-			bottom: 2.5rem;
-			max-width: 100%;
-		}
-
-		h1 {
-			line-height: 1.5;
-		}
-	}
+  }
 </style>

@@ -1,0 +1,39 @@
+{
+  "users": {
+    "sergio": {
+      "password": "123456",
+      "isAdmin": true
+    },
+    "enric": {
+      "password": "123456",
+      "isAdmin": true,
+      "role": "admin"
+    },
+    "enric@bjourney.com": {
+      "password": "enric123",
+      "isAdmin": true
+    },
+    "agencia.norte": {
+      "password": "agencia123",
+      "isAdmin": false,
+      "role": "agency",
+      "agencyId": "AG001",
+      "agencyName": "Viajes Norte"
+    },
+    "agencia.sur": {
+      "password": "agencia456",
+      "isAdmin": false,
+      "role": "agency",
+      "agencyId": "AG002",
+      "agencyName": "Buses del Sur"
+    },
+    "sergio@bjourney.com": {
+      "password": "123456",
+      "isAdmin": false
+    },
+    "sergiotonto@gmail.com": {
+      "password": "123456",
+      "isAdmin": false
+    }
+  }
+}

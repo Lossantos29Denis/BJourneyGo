@@ -1,0 +1,735 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    }
+  }
+</script>
+
+<Layout title="Gestión de Billetes — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="tickets-hero">
+        <div class="hero-header">
+          <a href="/intranet" class="back-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver a Intranet
+          </a>
+          <h1>Gestión de Billetes y Rutas</h1>
+          <p class="lead">Administra rutas, horarios, precios y disponibilidad de billetes.</p>
+        </div>
+      </section>
+
+      <!-- Acciones rápidas -->
+      <div class="quick-actions">
+        <button class="action-btn action-btn--primary" id="createRouteBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nueva ruta
+        </button>
+        <button class="action-btn" id="createScheduleBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Nuevo horario
+        </button>
+        <button class="action-btn" id="bulkEditBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Edición masiva
+        </button>
+        <button class="action-btn" id="exportDataBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Exportar
+        </button>
+      </div>
+
+      <!-- Filtros y búsqueda -->
+      <div class="filters-section">
+        <div class="search-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar por origen, destino, código de ruta..." />
+        </div>
+        <div class="filter-controls">
+          <select id="statusFilter" class="filter-select">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activas</option>
+            <option value="inactive">Inactivas</option>
+            <option value="maintenance">En mantenimiento</option>
+          </select>
+          <select id="typeFilter" class="filter-select">
+            <option value="all">Todos los tipos</option>
+            <option value="express">Express</option>
+            <option value="standard">Estándar</option>
+            <option value="night">Nocturno</option>
+          </select>
+          <button class="filter-btn" id="clearFiltersBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Rutas activas</span>
+          <span class="stat-value" id="activeRoutes">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Horarios hoy</span>
+          <span class="stat-value" id="todaySchedules">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Billetes disponibles</span>
+          <span class="stat-value" id="availableTickets">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Ocupación promedio</span>
+          <span class="stat-value" id="avgOccupancy">0%</span>
+        </div>
+      </div>
+
+      <!-- Tabla de rutas -->
+      <section class="routes-table-section">
+        <div class="section-header">
+          <h3>Rutas disponibles</h3>
+          <div class="view-switcher">
+            <button class="view-btn active" data-view="table">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+              </svg>
+            </button>
+            <button class="view-btn" data-view="grid">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-view" id="tableView">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" id="selectAll" />
+                  </th>
+                  <th>Código</th>
+                  <th>Ruta</th>
+                  <th>Tipo</th>
+                  <th>Duración</th>
+                  <th>Precio</th>
+                  <th>Capacidad</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="routesTableBody">
+                <tr>
+                  <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Cargando rutas...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-view" id="gridView" style="display: none;">
+          <div id="routesGridContainer" class="routes-grid">
+            <!-- Las tarjetas se generarán dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Paginación -->
+      <div class="pagination">
+        <button class="pagination-btn" id="prevPage" disabled>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Anterior
+        </button>
+        <div class="pagination-info">
+          Página <span id="currentPage">1</span> de <span id="totalPages">1</span>
+        </div>
+        <button class="pagination-btn" id="nextPage">
+          Siguiente
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar ruta -->
+  <div class="modal" id="routeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nueva ruta</h3>
+        <button class="modal-close" id="closeModal">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="routeForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="routeCode">Código de ruta *</label>
+            <input type="text" id="routeCode" placeholder="MAD-BCN-001" required />
+          </div>
+          <div class="form-group">
+            <label for="routeType">Tipo de servicio *</label>
+            <select id="routeType" required>
+              <option value="">Seleccionar...</option>
+              <option value="express">Express</option>
+              <option value="standard">Estándar</option>
+              <option value="night">Nocturno</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="origin">Origen *</label>
+            <input type="text" id="origin" placeholder="Madrid" required />
+          </div>
+          <div class="form-group">
+            <label for="destination">Destino *</label>
+            <input type="text" id="destination" placeholder="Barcelona" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duración (minutos) *</label>
+            <input type="number" id="duration" placeholder="240" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="distance">Distancia (km)</label>
+            <input type="number" id="distance" placeholder="620" min="1" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price">Precio base (€) *</label>
+            <input type="number" id="price" placeholder="25.00" step="0.01" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="capacity">Capacidad (asientos) *</label>
+            <input type="number" id="capacity" placeholder="50" min="1" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="stops">Paradas intermedias</label>
+          <input type="text" id="stops" placeholder="Zaragoza, Lleida" />
+          <small>Separar por comas</small>
+        </div>
+
+        <div class="form-group">
+          <label for="amenities">Servicios incluidos</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="amenity" value="wifi" /> Wi-Fi</label>
+            <label><input type="checkbox" name="amenity" value="ac" /> Aire acondicionado</label>
+            <label><input type="checkbox" name="amenity" value="wc" /> Baño</label>
+            <label><input type="checkbox" name="amenity" value="usb" /> Cargador USB</label>
+            <label><input type="checkbox" name="amenity" value="food" /> Comida</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Estado</label>
+          <select id="status">
+            <option value="active">Activa</option>
+            <option value="inactive">Inactiva</option>
+            <option value="maintenance">En mantenimiento</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar ruta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .page-wrapper{min-height:calc(100vh - 160px);display:flex;flex-direction:column}
+    .page-content{flex:1;padding-bottom:3rem}
+
+    .tickets-hero{margin:2rem 0;text-align:center}
+    .hero-header{max-width:800px;margin:0 auto}
+    .back-link{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.95rem;margin-bottom:1rem;transition:color .2s;text-decoration:none}
+    .back-link:hover{color:var(--accent-1)}
+    .tickets-hero h1{margin:.5rem 0;color:var(--accent-1);font-size:2rem;font-weight:700;letter-spacing:-0.5px}
+    .lead{color:var(--text-muted);margin:.5rem auto 2rem auto;font-size:1.05rem}
+
+    /* Quick Actions */
+    .quick-actions{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .action-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;font-weight:500;cursor:pointer;transition:all .2s}
+    .action-btn:hover{background:var(--bg-muted);border-color:var(--accent-1);transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+    .action-btn--primary{background:var(--accent-1);border-color:var(--accent-1);color:white}
+    .action-btn--primary:hover{background:#ea580c;border-color:#ea580c}
+
+    /* Filters */
+    .filters-section{background:var(--card);padding:1.25rem;border-radius:14px;border:1px solid var(--border);margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap}
+    .search-box{flex:1;min-width:280px;position:relative;display:flex;align-items:center}
+    .search-box svg{position:absolute;left:1rem;color:var(--text-muted);pointer-events:none}
+    .search-box input{width:100%;padding:.75rem 1rem .75rem 3rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem}
+    .search-box input:focus{outline:none;border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
+    
+    .filter-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+    .filter-select{padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem;cursor:pointer}
+    .filter-select:focus{outline:none;border-color:var(--accent-1)}
+    .filter-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-size:.9rem;cursor:pointer;transition:all .2s}
+    .filter-btn:hover{background:var(--bg-muted);color:var(--text)}
+
+    /* Stats Row */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--card);padding:1.25rem;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem}
+    .stat-label{color:var(--text-muted);font-size:.85rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .stat-value{color:var(--accent-1);font-size:1.75rem;font-weight:700}
+
+    /* Table Section */
+    .routes-table-section{background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);margin-bottom:1.5rem}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+    .section-header h3{margin:0;color:var(--text);font-size:1.15rem;font-weight:600}
+    
+    .view-switcher{display:flex;gap:.5rem}
+    .view-btn{padding:.5rem;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+    .view-btn:hover{background:var(--bg-muted);color:var(--text)}
+    .view-btn.active{background:var(--accent-1);border-color:var(--accent-1);color:white}
+
+    .table-responsive{overflow-x:auto}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th,.data-table td{padding:.85rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .data-table th{color:var(--text-muted);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;background:var(--bg-muted)}
+    .data-table td{color:var(--text);font-size:.95rem}
+    .data-table tr:hover{background:var(--bg-muted)}
+    
+    .status-badge{display:inline-block;padding:.35rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+    .status-badge.active{background:rgba(34,197,94,0.1);color:#22c55e}
+    .status-badge.inactive{background:rgba(148,163,184,0.1);color:#94a3b8}
+    .status-badge.maintenance{background:rgba(251,191,36,0.1);color:#fbbf24}
+
+    .action-icons{display:flex;gap:.5rem}
+    .icon-btn{padding:.4rem;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+    .icon-btn:hover{background:var(--accent-1);border-color:var(--accent-1);color:white}
+
+    /* Grid View */
+    .routes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem}
+    .route-card{background:var(--bg);padding:1.5rem;border-radius:12px;border:1px solid var(--border);transition:all .25s}
+    .route-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px var(--shadow-hover);border-color:var(--accent-1)}
+    .route-card-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem}
+    .route-code{color:var(--text);font-size:1.1rem;font-weight:700}
+    .route-card-body{display:flex;flex-direction:column;gap:.75rem}
+    .route-info{display:flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem}
+    .route-price{color:var(--accent-1);font-size:1.35rem;font-weight:700}
+
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:1rem;margin-top:1.5rem}
+    .pagination-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;cursor:pointer;transition:all .2s}
+    .pagination-btn:hover:not(:disabled){background:var(--accent-1);border-color:var(--accent-1);color:white}
+    .pagination-btn:disabled{opacity:.4;cursor:not-allowed}
+    .pagination-info{color:var(--text-muted);font-size:.95rem}
+
+    /* Modal */
+    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+    .modal.active{display:flex}
+    .modal-content{background:var(--card);border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:700px;width:100%;max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid var(--border)}
+    .modal-header h3{margin:0;color:var(--text);font-size:1.25rem;font-weight:600}
+    .modal-close{padding:.5rem;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:all .2s;display:flex}
+    .modal-close:hover{background:var(--bg-muted);color:var(--text)}
+
+    .modal-form{padding:1.5rem}
+    .form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1rem}
+    .form-group{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+    .form-group label{color:var(--text);font-size:.9rem;font-weight:500}
+    .form-group small{color:var(--text-muted);font-size:.85rem}
+    .form-group input,.form-group select{padding:.75rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem}
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
+    
+    .checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+    .checkbox-group label{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.9rem;font-weight:normal;cursor:pointer}
+    .checkbox-group input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
+
+    .form-actions{display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+
+    @media (max-width:900px){
+      .filters-section{flex-direction:column}
+      .search-box{min-width:100%}
+      .form-row{grid-template-columns:1fr}
+      .routes-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:620px){
+      .tickets-hero{margin:1.5rem 0}
+      .tickets-hero h1{font-size:1.5rem}
+      .quick-actions{gap:.5rem}
+      .action-btn{padding:.6rem 1rem;font-size:.9rem}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .routes-table-section{padding:1rem}
+      .data-table th,.data-table td{padding:.65rem .5rem;font-size:.85rem}
+      .checkbox-group{grid-template-columns:1fr}
+    }
+
+    @media (max-width:480px){
+      .stats-row{grid-template-columns:1fr}
+      .stat-value{font-size:1.5rem}
+      .modal-content{max-height:95vh}
+      .form-actions{flex-direction:column}
+      .form-actions button{width:100%}
+    }
+  </style>
+
+  <script type="module">
+    // Protect page: verify intranet authentication
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      location.replace('/intranet-login');
+    }
+
+    const role = localStorage.getItem('intranetRole') || 'admin';
+    const agencyId = localStorage.getItem('agencyId') || '';
+    const agencyName = localStorage.getItem('agencyName') || '';
+
+    // Update title for agency users
+    if (role === 'agency') {
+      document.querySelector('.tickets-hero h1').textContent = 'Gestión de Billetes - ' + agencyName;
+      document.querySelector('.lead').textContent = 'Administra tus rutas, horarios, precios y disponibilidad de billetes.';
+      
+      // Hide admin-only actions for agencies
+      document.getElementById('bulkEditBtn').style.display = 'none';
+      document.getElementById('createScheduleBtn').parentElement.querySelector('.action-btn:first-child').style.display = 'none';
+    }
+
+    // Mock data for routes
+    let allRoutes = [
+      { id: 1, code: 'MAD-BCN-001', origin: 'Madrid', destination: 'Barcelona', type: 'express', duration: 240, price: 25.00, capacity: 50, occupied: 46, status: 'active', agencyId: 'AG001' },
+      { id: 2, code: 'BCN-VAL-002', origin: 'Barcelona', destination: 'Valencia', type: 'standard', duration: 180, price: 18.50, capacity: 45, occupied: 38, status: 'active', agencyId: 'AG001' },
+      { id: 3, code: 'MAD-SEV-003', origin: 'Madrid', destination: 'Sevilla', type: 'express', duration: 300, price: 28.00, capacity: 50, occupied: 41, status: 'active', agencyId: 'AG002' },
+      { id: 4, code: 'VAL-ALC-004', origin: 'Valencia', destination: 'Alicante', type: 'standard', duration: 90, price: 12.00, capacity: 40, occupied: 31, status: 'active', agencyId: 'AG001' },
+      { id: 5, code: 'BCN-MAD-005', origin: 'Barcelona', destination: 'Madrid', type: 'night', duration: 270, price: 22.00, capacity: 48, occupied: 35, status: 'active', agencyId: 'AG002' },
+      { id: 6, code: 'SEV-GRX-006', origin: 'Sevilla', destination: 'Granada', type: 'standard', duration: 150, price: 15.50, capacity: 42, occupied: 29, status: 'active', agencyId: 'AG002' },
+      { id: 7, code: 'MAD-VAL-007', origin: 'Madrid', destination: 'Valencia', type: 'express', duration: 195, price: 23.00, capacity: 50, occupied: 33, status: 'maintenance', agencyId: 'AG001' },
+      { id: 8, code: 'BCN-ZAR-008', origin: 'Barcelona', destination: 'Zaragoza', type: 'standard', duration: 120, price: 16.00, capacity: 45, occupied: 27, status: 'inactive', agencyId: 'AG002' },
+    ];
+
+    // Filter routes by agency if not admin
+    const mockRoutes = role === 'agency' 
+      ? allRoutes.filter(route => route.agencyId === agencyId)
+      : allRoutes;
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredRoutes = [...mockRoutes];
+
+    // Initialize stats
+    function updateStats() {
+      document.getElementById('activeRoutes').textContent = mockRoutes.filter(r => r.status === 'active').length;
+      document.getElementById('todaySchedules').textContent = '24';
+      document.getElementById('availableTickets').textContent = mockRoutes.reduce((sum, r) => sum + (r.capacity - r.occupied), 0);
+      const avgOcc = mockRoutes.reduce((sum, r) => sum + (r.occupied / r.capacity * 100), 0) / mockRoutes.length;
+      document.getElementById('avgOccupancy').textContent = avgOcc.toFixed(1) + '%';
+    }
+
+    // Render table
+    function renderTable() {
+      const tbody = document.getElementById('routesTableBody');
+      
+      if (filteredRoutes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">No se encontraron rutas</td></tr>';
+        return;
+      }
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageRoutes = filteredRoutes.slice(start, end);
+
+      tbody.innerHTML = pageRoutes.map(route => `
+        <tr>
+          <td><input type="checkbox" value="${route.id}" /></td>
+          <td><strong>${route.code}</strong></td>
+          <td>${route.origin} → ${route.destination}</td>
+          <td style="text-transform: capitalize;">${route.type}</td>
+          <td>${Math.floor(route.duration / 60)}h ${route.duration % 60}min</td>
+          <td>€${route.price.toFixed(2)}</td>
+          <td>${route.occupied}/${route.capacity}</td>
+          <td><span class="status-badge ${route.status}">${route.status === 'active' ? 'Activa' : route.status === 'inactive' ? 'Inactiva' : 'Mantenimiento'}</span></td>
+          <td>
+            <div class="action-icons">
+              <button class="icon-btn edit-btn" data-id="${route.id}" title="Editar">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button class="icon-btn delete-btn" data-id="${route.id}" title="Eliminar">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Add event listeners
+      tbody.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteRoute(btn.dataset.id));
+      });
+    }
+
+    // Render grid
+    function renderGrid() {
+      const container = document.getElementById('routesGridContainer');
+      
+      if (filteredRoutes.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--text-muted); grid-column: 1/-1;">No se encontraron rutas</p>';
+        return;
+      }
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageRoutes = filteredRoutes.slice(start, end);
+
+      container.innerHTML = pageRoutes.map(route => `
+        <div class="route-card">
+          <div class="route-card-header">
+            <div class="route-code">${route.code}</div>
+            <span class="status-badge ${route.status}">${route.status === 'active' ? 'Activa' : route.status === 'inactive' ? 'Inactiva' : 'Mant.'}</span>
+          </div>
+          <div class="route-card-body">
+            <div class="route-info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              ${route.origin} → ${route.destination}
+            </div>
+            <div class="route-info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              ${Math.floor(route.duration / 60)}h ${route.duration % 60}min
+            </div>
+            <div class="route-info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              ${route.occupied}/${route.capacity} ocupados
+            </div>
+            <div class="route-price">€${route.price.toFixed(2)}</div>
+            <div class="action-icons">
+              <button class="icon-btn edit-btn" data-id="${route.id}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Editar
+              </button>
+              <button class="icon-btn delete-btn" data-id="${route.id}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners
+      container.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+      });
+      container.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteRoute(btn.dataset.id));
+      });
+    }
+
+    // Update pagination
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage);
+      document.getElementById('currentPage').textContent = currentPage;
+      document.getElementById('totalPages').textContent = totalPages;
+      document.getElementById('prevPage').disabled = currentPage === 1;
+      document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    }
+
+    // View switcher
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const view = btn.dataset.view;
+        if (view === 'table') {
+          document.getElementById('tableView').style.display = 'block';
+          document.getElementById('gridView').style.display = 'none';
+          renderTable();
+        } else {
+          document.getElementById('tableView').style.display = 'none';
+          document.getElementById('gridView').style.display = 'block';
+          renderGrid();
+        }
+      });
+    });
+
+    // Search and filter
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      filteredRoutes = mockRoutes.filter(route => 
+        route.code.toLowerCase().includes(query) ||
+        route.origin.toLowerCase().includes(query) ||
+        route.destination.toLowerCase().includes(query)
+      );
+      currentPage = 1;
+      renderTable();
+      updatePagination();
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('typeFilter').addEventListener('change', applyFilters);
+
+    function applyFilters() {
+      const status = document.getElementById('statusFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      
+      filteredRoutes = mockRoutes.filter(route => {
+        const matchStatus = status === 'all' || route.status === status;
+        const matchType = type === 'all' || route.type === type;
+        return matchStatus && matchType;
+      });
+      
+      currentPage = 1;
+      renderTable();
+      updatePagination();
+    }
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = 'all';
+      document.getElementById('typeFilter').value = 'all';
+      filteredRoutes = [...mockRoutes];
+      currentPage = 1;
+      renderTable();
+      updatePagination();
+    });
+
+    // Pagination
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+        updatePagination();
+      }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+        updatePagination();
+      }
+    });
+
+    // Modal functions
+    const modal = document.getElementById('routeModal');
+    const form = document.getElementById('routeForm');
+
+    document.getElementById('createRouteBtn').addEventListener('click', () => {
+      document.getElementById('modalTitle').textContent = 'Nueva ruta';
+      form.reset();
+      modal.classList.add('active');
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Here you would save the route data
+      alert('Ruta guardada correctamente (en producción se guardaría en la base de datos)');
+      modal.classList.remove('active');
+      form.reset();
+    });
+
+    function openEditModal(id) {
+      const route = mockRoutes.find(r => r.id == id);
+      if (route) {
+        document.getElementById('modalTitle').textContent = 'Editar ruta';
+        document.getElementById('routeCode').value = route.code;
+        document.getElementById('origin').value = route.origin;
+        document.getElementById('destination').value = route.destination;
+        document.getElementById('routeType').value = route.type;
+        document.getElementById('duration').value = route.duration;
+        document.getElementById('price').value = route.price;
+        document.getElementById('capacity').value = route.capacity;
+        document.getElementById('status').value = route.status;
+        modal.classList.add('active');
+      }
+    }
+
+    function deleteRoute(id) {
+      if (confirm('¿Estás seguro de que quieres eliminar esta ruta?')) {
+        alert(`Ruta ${id} eliminada (en producción se eliminaría de la base de datos)`);
+        // In production, would call API to delete
+      }
+    }
+
+    // Quick action buttons
+    document.getElementById('createScheduleBtn').addEventListener('click', () => {
+      alert('Funcionalidad en desarrollo: Crear nuevo horario');
+    });
+
+    document.getElementById('bulkEditBtn').addEventListener('click', () => {
+      alert('Funcionalidad en desarrollo: Edición masiva de rutas');
+    });
+
+    document.getElementById('exportDataBtn').addEventListener('click', () => {
+      alert('Funcionalidad en desarrollo: Exportar datos a CSV/Excel');
+    });
+
+    // Initialize
+    updateStats();
+    renderTable();
+    updatePagination();
+  </script>
+</Layout>

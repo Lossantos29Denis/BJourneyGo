@@ -1,0 +1,152 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/gestion-usuarios.css';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    }
+  }
+</script>
+
+<Layout title="Gestión de Usuarios — BJourneyGo Intranet">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Gestión de Usuarios</h1>
+        <p class="lead">Crear, modificar y eliminar usuarios del sistema. Asigna roles de empleado o administrador.</p>
+      </section>
+
+      <div class="actions-bar">
+        <button id="btnNewUser" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Nuevo Usuario</span>
+        </button>
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar usuarios...">
+        </div>
+      </div>
+
+      <div class="users-table-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Los usuarios se cargarán dinámicamente -->
+          </tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <p>No hay usuarios registrados</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar usuario -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nuevo Usuario</h2>
+        <button class="modal-close" id="closeModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="userForm" class="modal-body">
+        <input type="hidden" id="userId">
+        <div class="form-group">
+          <label for="username">Nombre de usuario *</label>
+          <input type="text" id="username" required placeholder="Ej: jdoe">
+        </div>
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" required placeholder="Ej: jdoe@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label for="fullName">Nombre completo *</label>
+          <input type="text" id="fullName" required placeholder="Ej: John Doe">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña *</label>
+          <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+          <small id="passwordHint">Dejar vacío para mantener la contraseña actual</small>
+        </div>
+        <div class="form-group">
+          <label for="role">Tipo de usuario *</label>
+          <select id="role" required>
+            <option value="">Selecciona un tipo</option>
+            <option value="empleado">Usuario estándar</option>
+            <option value="admin">Administrador Web</option>
+            <option value="agency">Administrador de Agencia</option>
+          </select>
+          <small>Los administradores tienen acceso a la Intranet</small>
+        </div>
+
+        <!-- Campos adicionales para agencias -->
+        <div id="agencyFields" style="display: none;">
+          <div class="form-group">
+            <label for="agencyName">Nombre de la Agencia *</label>
+            <input type="text" id="agencyName" placeholder="Ej: Viajes Norte">
+            <small>Nombre comercial de la agencia de transporte</small>
+          </div>
+          <div class="form-group">
+            <label for="agencyPhone">Teléfono de contacto</label>
+            <input type="tel" id="agencyPhone" placeholder="Ej: +34 912 345 678">
+          </div>
+          <div class="form-group">
+            <label for="agencyAddress">Dirección</label>
+            <input type="text" id="agencyAddress" placeholder="Ej: Calle Principal 123, Madrid">
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+        <button type="submit" form="userForm" class="btn btn-primary" id="saveBtn">Guardar Usuario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>Confirmar eliminación</h2>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+        <p><strong id="deleteUserName"></strong></p>
+        <p class="warning">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/scripts/gestion-usuarios.js"></script>
+</Layout>

@@ -1,0 +1,263 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-documentos.css';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    }
+  }
+</script>
+
+<Layout title="Documentos Internos — Intranet BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Documentos Internos</h1>
+        <p class="lead">Políticas, manuales y recursos para empleados de BJourneyGo.</p>
+      </section>
+
+      <!-- Buscador y Filtros -->
+      <div class="search-section">
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar documentos..." class="search-input">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="todos">Todos</button>
+          <button class="filter-btn" data-filter="politicas">Políticas</button>
+          <button class="filter-btn" data-filter="manuales">Manuales</button>
+          <button class="filter-btn" data-filter="recursos">Recursos</button>
+        </div>
+      </div>
+
+      <!-- Lista de Documentos -->
+      <div class="documents-container">
+        <!-- Políticas -->
+        <section class="documents-category" data-category="politicas">
+          <h2>Políticas de la Empresa</h2>
+          <div class="documents-grid">
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <h3>Política de Conducta</h3>
+              <p>Normas de comportamiento y ética profesional en la empresa.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 15 dic 2025</span>
+                <span class="doc-size">2.4 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <h3>Política de Privacidad</h3>
+              <p>Protección de datos personales y privacidad de empleados y clientes.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 10 dic 2025</span>
+                <span class="doc-size">1.8 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <h3>Política de Seguridad</h3>
+              <p>Medidas de seguridad física y digital en las instalaciones.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 5 dic 2025</span>
+                <span class="doc-size">3.2 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <h3>Política de Horarios</h3>
+              <p>Normas sobre jornada laboral, vacaciones y ausencias.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 1 dic 2025</span>
+                <span class="doc-size">1.5 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manuales -->
+        <section class="documents-category" data-category="manuales">
+          <h2>Manuales y Guías</h2>
+          <div class="documents-grid">
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+              </div>
+              <h3>Manual del Sistema BJourneyGo</h3>
+              <p>Guía completa de uso del sistema de gestión de rutas.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 20 dic 2025</span>
+                <span class="doc-size">5.8 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+              </div>
+              <h3>Manual del Usuario</h3>
+              <p>Instrucciones paso a paso para usuarios del sistema.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 18 dic 2025</span>
+                <span class="doc-size">4.2 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+              </div>
+              <h3>Guía de Atención al Cliente</h3>
+              <p>Mejores prácticas para la atención y servicio al cliente.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 12 dic 2025</span>
+                <span class="doc-size">2.9 MB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recursos -->
+        <section class="documents-category" data-category="recursos">
+          <h2>Recursos y Formularios</h2>
+          <div class="documents-grid">
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3>Formulario de Solicitud de Vacaciones</h3>
+              <p>Plantilla para solicitar días de vacaciones.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 15 dic 2025</span>
+                <span class="doc-size">85 KB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3>Formulario de Solicitud de Permisos</h3>
+              <p>Plantilla para solicitar permisos especiales.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 10 dic 2025</span>
+                <span class="doc-size">72 KB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3>Directorio de Contactos</h3>
+              <p>Lista de contactos departamentales y externos.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 8 dic 2025</span>
+                <span class="doc-size">156 KB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+
+            <div class="document-card">
+              <div class="doc-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3>Plantilla de Reporte de Incidencias</h3>
+              <p>Formulario para reportar problemas o incidencias.</p>
+              <div class="doc-meta">
+                <span class="doc-date">Actualizado: 5 dic 2025</span>
+                <span class="doc-size">95 KB</span>
+              </div>
+              <button class="btn btn-primary doc-btn">Descargar</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Panel de Estadísticas -->
+      <section class="documents-stats">
+        <h2>Información de Documentos</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">16</div>
+            <div class="stat-label">Documentos Totales</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Políticas</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Manuales</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Formularios</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/scripts/intranet-documentos.js"></script>
+</Layout>

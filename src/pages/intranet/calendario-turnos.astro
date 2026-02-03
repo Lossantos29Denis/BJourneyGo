@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-calendario-turnos.css';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    }
+  }
+</script>
+
+<Layout title="Calendario de Turnos — Intranet BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Calendario de Turnos</h1>
+        <p class="lead">Gestiona y visualiza los horarios de trabajo del equipo.</p>
+      </section>
+
+      <!-- Controles del Calendario -->
+      <div class="calendar-controls">
+        <div class="month-navigation">
+          <button id="prevMonth" class="nav-btn">← Anterior</button>
+          <h2 id="currentMonth">Enero 2026</h2>
+          <button id="nextMonth" class="nav-btn">Siguiente →</button>
+        </div>
+        
+        <div class="view-options">
+          <button class="view-btn active" data-view="calendar">Calendario</button>
+          <button class="view-btn" data-view="list">Lista de Turnos</button>
+          <button class="view-btn" data-view="employee">Por Empleado</button>
+        </div>
+      </div>
+
+      <!-- Vista de Calendario -->
+      <div class="calendar-view-container" id="calendarViewContainer">
+        <div class="calendar-wrapper">
+          <div class="weekday-header">
+            <div class="weekday">Lun</div>
+            <div class="weekday">Mar</div>
+            <div class="weekday">Mié</div>
+            <div class="weekday">Jue</div>
+            <div class="weekday">Vie</div>
+            <div class="weekday">Sáb</div>
+            <div class="weekday">Dom</div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid">
+            <!-- Se llena con JavaScript -->
+          </div>
+        </div>
+
+        <!-- Leyenda de Turnos -->
+        <div class="shifts-legend">
+          <h3>Leyenda de Turnos</h3>
+          <div class="legend-items">
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #3B82F6;"></div>
+              <span>Turno Mañana (6:00 - 14:00)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #F59E0B;"></div>
+              <span>Turno Tarde (14:00 - 22:00)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #8B5CF6;"></div>
+              <span>Turno Noche (22:00 - 6:00)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #10B981;"></div>
+              <span>Libre/Descanso</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #EF4444;"></div>
+              <span>Vacaciones</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista de Lista -->
+      <div class="list-view-container hidden" id="listViewContainer">
+        <div class="list-filters">
+          <input type="text" id="searchEmployee" placeholder="Buscar empleado..." class="search-input">
+          <select id="filterShift" class="filter-select">
+            <option value="">Todos los turnos</option>
+            <option value="morning">Turno Mañana</option>
+            <option value="afternoon">Turno Tarde</option>
+            <option value="night">Turno Noche</option>
+            <option value="rest">Descanso</option>
+            <option value="vacation">Vacaciones</option>
+          </select>
+        </div>
+        <div class="shifts-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Turnos (Semana 1)</th>
+                <th>Turnos (Semana 2)</th>
+                <th>Turnos (Semana 3)</th>
+                <th>Turnos (Semana 4)</th>
+              </tr>
+            </thead>
+            <tbody id="shiftsTableBody">
+              <!-- Se llena con JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vista por Empleado -->
+      <div class="employee-view-container hidden" id="employeeViewContainer">
+        <div class="employee-list">
+          <div class="employee-search">
+            <input type="text" id="employeeSearchInput" placeholder="Buscar empleado..." class="search-input">
+          </div>
+          <div class="employee-items" id="employeeItems">
+            <!-- Se llena con JavaScript -->
+          </div>
+        </div>
+        <div class="employee-detail">
+          <div id="employeeDetail" class="detail-placeholder">
+            <p>Selecciona un empleado para ver su calendario</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel de Estadísticas -->
+      <section class="schedule-stats">
+        <h2>Estadísticas del Mes</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalEmployees">12</div>
+            <div class="stat-label">Empleados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="morningShifts">28</div>
+            <div class="stat-label">Turnos Mañana</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="afternoonShifts">24</div>
+            <div class="stat-label">Turnos Tarde</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="nightShifts">20</div>
+            <div class="stat-label">Turnos Noche</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Acciones -->
+      <div class="actions-section">
+        <h2>Acciones</h2>
+        <div class="actions-buttons">
+          <button class="btn btn-primary" id="exportBtn">📥 Exportar Calendario</button>
+          <button class="btn btn-secondary" id="printBtn">🖨️ Imprimir</button>
+          <button class="btn btn-secondary" id="settingsBtn">⚙️ Ajustes de Turnos</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/scripts/intranet-calendario-turnos.js"></script>
+</Layout>

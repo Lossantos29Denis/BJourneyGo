@@ -1,0 +1,359 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    }
+  }
+</script>
+
+<Layout title="Intranet — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="intranet-hero">
+        <h1 id="heroTitle">Intranet BJourneyGo</h1>
+        <p class="lead" id="heroLead">Área privada para empleados. Gestión interna y recursos.</p>
+      </section>
+
+      <div class="intranet-grid" id="intranetGrid">
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3>Estadísticas</h3>
+          <p>Ver métricas de ventas, ocupación y rendimiento de rutas.</p>
+          <a href="/estadisticas" class="btn btn--ghost btn--small">Ver estadísticas</a>
+        </section>
+
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </div>
+          <h3>Gestión de usuarios</h3>
+          <p>Administrar cuentas de clientes y empleados.</p>
+          <a href="/gestion-usuarios" class="btn btn--ghost btn--small">Gestionar usuarios</a>
+        </section>
+
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+          </div>
+          <h3>Gestión de billetes</h3>
+          <p>Crear, editar y gestionar rutas y horarios.</p>
+          <a href="/gestion-billetes" class="btn btn--ghost btn--small">Gestionar billetes</a>
+        </section>
+
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3>Configuración del sistema</h3>
+          <p>Ajustes generales, integraciones y permisos.</p>
+          <a href="/intranet/configuracion" class="btn btn--ghost btn--small">Configurar</a>
+        </section>
+
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h3>Documentos internos</h3>
+          <p>Políticas, manuales y recursos para empleados.</p>
+          <a href="/intranet/documentos" class="btn btn--ghost btn--small">Ver documentos</a>
+        </section>
+
+        <section class="intranet-card">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>Calendario de turnos</h3>
+          <p>Ver y gestionar horarios de trabajo del equipo.</p>
+          <a href="/intranet/calendario-turnos" class="btn btn--ghost btn--small">Ver calendario</a>
+        </section>
+      </div>
+
+      <section class="session-info">
+        <h3>Información de sesión</h3>
+        <p id="sessionInfo">Cargando...</p>
+        <button id="logoutBtn" class="btn btn--ghost">Cerrar sesión</button>
+      </section>
+    </main>
+  </div>
+
+  <style>
+    .page-wrapper{min-height:calc(100vh - 160px);display:flex;flex-direction:column}
+    .page-content{flex:1;padding-bottom:3rem}
+
+    .intranet-hero{margin:2rem 0 2rem 0;text-align:center}
+    .intranet-hero h1{margin:0 0 .5rem 0;color:var(--accent-1);font-size:2rem;font-weight:700;letter-spacing:-0.5px}
+    .lead{color:var(--text-muted);margin:0 auto 2rem auto;max-width:640px;font-size:1.05rem}
+
+    .intranet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;margin-bottom:2rem}
+
+    .intranet-card{background:var(--card);padding:1.75rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);transition:all .25s ease;display:flex;flex-direction:column;gap:.75rem}
+    .intranet-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px var(--shadow-hover);border-color:var(--accent-1)}
+
+    .card-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.05));border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent-1);margin-bottom:.5rem}
+
+    .intranet-card h3{margin:0;color:var(--text);font-size:1.15rem;font-weight:600}
+    .intranet-card p{margin:0;color:var(--text-muted);font-size:.95rem;flex:1}
+    .intranet-card .btn{margin-top:.5rem}
+
+    .session-info{background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);max-width:700px;margin:0 auto}
+    .session-info h3{margin:0 0 .75rem 0;color:var(--text);font-size:1.15rem}
+    .session-info p{color:var(--text-muted);margin-bottom:1rem}
+
+    @media (max-width:900px){
+      .intranet-grid{grid-template-columns:repeat(2,1fr)}
+    }
+
+    @media (max-width:620px){
+      .intranet-hero{margin:1.5rem 0}
+      .intranet-hero h1{font-size:1.5rem}
+      .lead{font-size:1rem}
+      .intranet-grid{grid-template-columns:1fr;gap:1rem}
+      .intranet-card{padding:1.25rem}
+      .session-info{padding:1.25rem}
+    }
+
+    @media (max-width:480px){
+      .page-content{padding-bottom:2rem}
+      .intranet-hero h1{font-size:1.35rem}
+      .intranet-card{padding:1rem}
+      .card-icon{width:48px;height:48px}
+      .intranet-card h3{font-size:1.05rem}
+    }
+  </style>
+
+  <script type="module">
+    // Protect intranet page: verify intranet authentication
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    if (intranetAuth !== 'true') {
+      location.replace('/intranet-login');
+    } else {
+      const user = localStorage.getItem('intranetUser') || 'admin';
+      const role = localStorage.getItem('intranetRole') || 'admin';
+      const agencyName = localStorage.getItem('agencyName') || '';
+      
+      // Update hero based on role
+      if (role === 'agency') {
+        document.getElementById('heroTitle').textContent = `Portal de Agencia`;
+        document.getElementById('heroLead').textContent = `Bienvenido ${agencyName}. Gestiona tus rutas y consulta estadísticas.`;
+        document.getElementById('sessionInfo').textContent = `Conectado como: ${user} (${agencyName})`;
+        
+        // Filter cards for agency role - only show relevant ones
+        const grid = document.getElementById('intranetGrid');
+        const allCards = grid.querySelectorAll('.intranet-card');
+        allCards.forEach(card => {
+          const title = card.querySelector('h3').textContent;
+          // Show only Estadísticas and Gestión de billetes for agencies
+          if (!title.includes('Estadísticas') && !title.includes('Gestión de billetes')) {
+            card.style.display = 'none';
+          }
+        });
+      } else {
+        document.getElementById('sessionInfo').textContent = `Conectado como: ${user} (administrador)`;
+      }
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('intranetAuth');
+      localStorage.removeItem('intranetUser');
+      localStorage.removeItem('intranetRole');
+      localStorage.removeItem('agencyId');
+      localStorage.removeItem('agencyName');
+      location.replace('/intranet-login');
+    });
+
+    // Add functionality to placeholder cards (except user management)
+    document.querySelectorAll('.intranet-card .btn').forEach(btn => {
+      if (btn.tagName === 'BUTTON') {
+        btn.addEventListener('click', () => {
+          alert('Funcionalidad en desarrollo. Próximamente.');
+        });
+      }
+    });
+
+    // Gestión del modal de clientes
+    const viewClientsBtn = document.getElementById('viewClientsBtn');
+    const clientsModal = document.getElementById('clientsModal');
+    const closeModal = document.getElementById('closeModal');
+
+    async function loadClients() {
+      try {
+        const response = await fetch('/data/users.json');
+        const data = await response.json();
+        const users = data.users;
+        
+        let totalClients = 0;
+        let totalAdmins = 0;
+        let totalAgencies = 0;
+        let totalRegular = 0;
+        
+        const tableBody = document.getElementById('clientsTableBody');
+        tableBody.innerHTML = '';
+        
+        for (const [username, userData] of Object.entries(users)) {
+          totalClients++;
+          const row = document.createElement('tr');
+          
+          let roleBadge = '';
+          let roleType = '';
+          let info = '-';
+          
+          if (userData.isAdmin) {
+            totalAdmins++;
+            roleBadge = '<span class="role-badge role-admin">Admin</span>';
+            roleType = 'Administrador';
+          } else if (userData.role === 'agency') {
+            totalAgencies++;
+            roleBadge = '<span class="role-badge role-agency">Agencia</span>';
+            roleType = 'Agencia';
+            info = userData.agencyName || '-';
+          } else {
+            totalRegular++;
+            roleBadge = '<span class="role-badge role-regular">Cliente</span>';
+            roleType = 'Cliente Regular';
+          }
+          
+          row.innerHTML = `
+            <td><strong>${username}</strong></td>
+            <td>${roleBadge}</td>
+            <td>${roleType}</td>
+            <td>${info}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon btn-edit" onclick="editUser('${username}')" title="Editar usuario">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button class="btn-icon btn-delete" onclick="deleteUser('${username}')" title="Eliminar usuario">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        }
+        
+        // Actualizar estadísticas
+        document.getElementById('totalClients').textContent = totalClients;
+        document.getElementById('totalAdmins').textContent = totalAdmins;
+        document.getElementById('totalAgencies').textContent = totalAgencies;
+        document.getElementById('totalRegular').textContent = totalRegular;
+        
+      } catch (error) {
+        console.error('Error al cargar clientes:', error);
+        const tableBody = document.getElementById('clientsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Error al cargar los clientes</td></tr>';
+      }
+    }
+
+    viewClientsBtn?.addEventListener('click', async () => {
+      clientsModal.classList.add('active');
+      await loadClients();
+    });
+
+    closeModal?.addEventListener('click', () => {
+      clientsModal.classList.remove('active');
+    });
+
+    // Cerrar modal al hacer clic fuera del contenido
+    clientsModal?.addEventListener('click', (e) => {
+      if (e.target === clientsModal) {
+        clientsModal.classList.remove('active');
+      }
+    });
+
+    // Cerrar modal con tecla ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && clientsModal.classList.contains('active')) {
+        clientsModal.classList.remove('active');
+      }
+    });
+    // Función para eliminar usuario
+    window.deleteUser = async (username) => {
+      if (!confirm(`¿Estás seguro de que quieres eliminar al usuario "${username}"?\n\nEsta acción no se puede deshacer.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/delete-user.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          alert(`Usuario "${username}" eliminado exitosamente.`);
+          await loadClients(); // Recargar la tabla
+        } else {
+          alert(`Error al eliminar usuario: ${result.message || 'Error desconocido'}`);
+        }
+      } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        alert('Error al eliminar el usuario. Por favor, intenta nuevamente.');
+      }
+    };
+
+    // Función para editar usuario
+    window.editUser = async (username) => {
+      const newPassword = prompt(`Editar usuario: ${username}\n\nIngresa la nueva contraseña (mínimo 4 caracteres):`);
+      
+      if (newPassword === null) {
+        return; // Usuario canceló
+      }
+
+      if (newPassword.trim().length < 4) {
+        alert('La contraseña debe tener al menos 4 caracteres.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/update-user.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password: newPassword })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          alert(`Contraseña del usuario "${username}" actualizada exitosamente.`);
+        } else {
+          alert(`Error al actualizar usuario: ${result.message || 'Error desconocido'}`);
+        }
+      } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        alert('Error al actualizar el usuario. Por favor, intenta nuevamente.');
+      }
+    };
+  </script>
+</Layout>

@@ -1,0 +1,34 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/comprar.css';
+---
+
+<Layout title="Comprar billetes — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="buy-hero">
+        <h1>Comprar billetes</h1>
+        <p class="lead">Aquí aparecerán los billetes disponibles. De momento no hay billetes reales, pero esta página está preparada para mostrarlos.</p>
+      </section>
+
+      <section class="search-panel">
+        <form id="searchForm" class="search-form" aria-label="Buscar billetes" novalidate>
+          <div class="field"><label for="from">Origen</label><input id="from" name="from" type="text" placeholder="Ej. Madrid" required aria-required="true" minlength="2" aria-label="Ciudad de origen"/></div>
+          <div class="field"><label for="to">Destino</label><input id="to" name="to" type="text" placeholder="Ej. Barcelona" required aria-required="true" minlength="2" aria-label="Ciudad de destino"/></div>
+          <div class="field"><label for="date">Fecha</label><input id="date" name="date" type="date" required aria-required="true" aria-label="Fecha de viaje"/></div>
+          <div class="field"><label for="maxPrice">Precio máximo (€)</label><input id="maxPrice" name="maxPrice" type="number" min="0" step="0.01" placeholder="50" aria-label="Precio máximo en euros"/></div>
+          <div class="actions"><button type="submit" class="btn btn--primary">Buscar</button><button type="button" id="resetBtn" class="btn btn--ghost">Restablecer</button></div>
+        </form>
+      </section>
+
+      <section class="tickets-grid" id="ticketsGrid" aria-live="polite">
+        <!-- Tickets will be rendered here by client-side JS -->
+      </section>
+      <div id="noResults" style="display:none;color:var(--muted);margin-top:1rem">No se han encontrado billetes que coincidan con la búsqueda.</div>
+
+      <p class="hint">Sugerencia: cuando haya integración con la API, reemplaza los placeholders con datos reales y activa los botones de compra.</p>
+    </main>
+  </div>
+
+  <script type="module" src="/src/scripts/comprar.js"></script>
+</Layout>

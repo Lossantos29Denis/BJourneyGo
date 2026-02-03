@@ -1,0 +1,36 @@
+---
+import AuthLayout from '../layouts/AuthLayout.astro';
+import '../styles/intranet-login.css';
+---
+
+<AuthLayout title="Intranet - BJourneyGo">
+	<div class="login-container">
+		<div class="login-header">
+			<img src="/bJourneyGO4 (1).png" alt="BJourneyGo Logo" class="logo" />
+			<h1>Intranet BJourneyGo</h1>
+			<p class="subtitle">Acceso exclusivo para personal autorizado</p>
+		</div>
+
+		<div class="login-card">
+			<h2>Iniciar sesión</h2>
+			<p class="muted">Ingresa tus credenciales de administrador</p>
+			<form id="intranetLoginForm" novalidate>
+				<div class="form-group">
+					<label for="username">Usuario</label>
+					<input type="text" id="username" name="username" required autocomplete="username" placeholder="Ingresa tu usuario" minlength="3" aria-label="Nombre de usuario" aria-required="true" />
+				</div>
+				<div class="form-group">
+					<label for="password">Contraseña</label>
+					<input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Ingresa tu contraseña" minlength="4" aria-label="Contraseña" aria-required="true" />
+				</div>
+				<div id="error-message" class="error-message" style="display:none;"></div>
+				<button type="submit" class="btn btn-primary">Acceder</button>
+			</form>
+			<div class="card-footer">
+				<a href="/" class="link">← Volver al inicio</a>
+			</div>
+		</div>
+	</div>
+
+	<script type="module" src="/src/scripts/intranet-login.js"></script>
+</AuthLayout>
