@@ -7,7 +7,7 @@ const params = new URLSearchParams(window.location.search)
 const sessionId = params.get('session_id')
 
 if (openAppLink && sessionId) {
-  openAppLink.href = `bjourneygo://checkout?status=success&session_id=${encodeURIComponent(sessionId)}`
+  openAppLink.href = `bjourneygo://payment/result?status=success&session_id=${encodeURIComponent(sessionId)}`
 }
 
 async function confirm() {
@@ -39,7 +39,7 @@ async function confirm() {
         ref: String(purchase.referenceCode || ''),
         email: String(purchase.contactEmail || '')
       })
-      openAppLink.href = `bjourneygo://checkout?${appParams.toString()}`
+      openAppLink.href = `bjourneygo://payment/result?${appParams.toString()}`
     }
 
     const esc = (v) => String(v ?? '')
