@@ -2,7 +2,7 @@ const statusText = document.getElementById('statusText')
 const openAppLink = document.getElementById('openAppLink')
 const purchaseContent = document.getElementById('purchaseContent')
 let lastPurchaseMeta = null
-let appLinkTimeout = null
+let misViajesTimeout = null
 let appLinkTarget = ''
 
 function setAppLinkTarget(url) {
@@ -62,10 +62,6 @@ async function confirm() {
         email: String(purchase.contactEmail || '')
       })
       setAppLinkTarget(`bjourneygo://payment/result?${appParams.toString()}`)
-      if (appLinkTimeout) clearTimeout(appLinkTimeout)
-      appLinkTimeout = setTimeout(() => {
-        if (appLinkTarget) launchApp()
-      }, 600)
     }
 
     const esc = (v) => String(v ?? '')
@@ -188,6 +184,15 @@ async function confirm() {
     if (purchase.referenceCode && purchase.contactEmail) {
       sessionStorage.setItem('lastPurchaseLookup', JSON.stringify({ ref: purchase.referenceCode, email: purchase.contactEmail }))
     }
+
+    if (misViajesTimeout) clearTimeout(misViajesTimeout)
+    const misViajesParams = new URLSearchParams({
+      ref: String(purchase.referenceCode || ''),
+      email: String(purchase.contactEmail || '')
+    })
+    misViajesTimeout = setTimeout(() => {
+      window.location.href = `/mis-viajes?${misViajesParams.toString()}`
+    }, 1400)
 
     purchaseContent.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-print-idx]')

@@ -258,32 +258,58 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
   const [selectingLeg, setSelectingLeg] = React.useState<Leg>('outbound')
   const [returnResults, setReturnResults] = React.useState<TripItem[]>([])
   const [loadingReturn, setLoadingReturn] = React.useState(false)
+  const [returnSearchError, setReturnSearchError] = React.useState('')
 
   const quantity = Math.max(1, Math.min(10, Math.floor(Number(quantityText) || 1)))
+  const outboundPrice = Number(trip.basePrice || 0)
+  const returnPrice = Number(returnTrip?.basePrice || 0)
+  const unitTotal = bookingType === 'ROUNDTRIP' ? outboundPrice + returnPrice : outboundPrice
+  const totalPrice = unitTotal * quantity
 
   const updatePassenger = React.useCallback((index: number, patch: Partial<PassengerForm>) => {
     setPassengers((current) => current.map((p, i) => (i === index ? { ...p, ...patch } : p)))
   }, [])
 
-  const onSelectReturnTrip = React.useCallback(async () => {
-    if (bookingType !== 'ROUNDTRIP' || selectingLeg !== 'outbound') return
+  const loadReturnTrips = React.useCallback(async () => {
+    if (bookingType !== 'ROUNDTRIP') return
     try {
       setLoadingReturn(true)
+      setReturnSearchError('')
+      const tripDate = String(trip.departureAt || '').trim().slice(0, 10)
+      const searchDate = /^\d{4}-\d{2}-\d{2}$/.test(tripDate) ? tripDate : new Date().toISOString().slice(0, 10)
       const payload = await getTrips({
         origin: trip.destination || '',
         destination: trip.origin || '',
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
+        startDate: searchDate,
+        endDate: searchDate,
       })
       const trips = normalizeTrips(payload)
-      setReturnResults(trips.filter(t => Number(t.id) !== Number(trip.id)))
+      const filtered = trips.filter(t => Number(t.id) !== Number(trip.id))
+      setReturnResults(filtered)
       setSelectingLeg('return')
+      if (filtered.length === 0) {
+        setReturnSearchError('No existen viajes de vuelta para esta ruta y fecha.')
+      }
     } catch (e: any) {
-      Alert.alert('Error', 'No se pudieron cargar viajes de vuelta.')
+      setReturnResults([])
+      setSelectingLeg('return')
+      setReturnSearchError(e?.message || 'No se pudieron cargar viajes de vuelta.')
     } finally {
       setLoadingReturn(false)
     }
-  }, [bookingType, selectingLeg, trip])
+  }, [bookingType, trip])
+
+  React.useEffect(() => {
+    if (!visible) return
+    if (bookingType === 'ROUNDTRIP') {
+      void loadReturnTrips()
+      return
+    }
+    setLoadingReturn(false)
+    setReturnSearchError('')
+    setReturnResults([])
+    setReturnTrip(null)
+  }, [bookingType, loadReturnTrips, visible])
 
   const onCheckout = React.useCallback(async () => {
     if (!trip) return
@@ -357,6 +383,7 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
     setPassengers(buildPassengers(1))
     setSelectingLeg('outbound')
     setReturnResults([])
+    setReturnSearchError('')
   }, [])
 
   React.useEffect(() => {
@@ -384,6 +411,20 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
             <Text style={styles.tripSummaryMeta}>Duración: {durationLabel(trip.departureAt, trip.arrivalAt)}</Text>
             <Text style={styles.tripSummaryMeta}>Precio: EUR {Number(trip.basePrice || 0).toFixed(2)} por persona</Text>
             <Text style={styles.tripSummaryMeta}>Plazas libres: {seatsLeft(trip)}</Text>
+            {bookingType === 'ROUNDTRIP' ? (
+              <>
+                <Text style={styles.tripSummaryMeta}>
+                  Vuelta: {returnTrip ? `${returnTrip.origin} → ${returnTrip.destination}` : 'Pendiente de selección'}
+                </Text>
+                <Text style={styles.tripSummaryMeta}>
+                  Total {returnTrip ? 'final' : 'provisional'}: {returnTrip ? `EUR ${totalPrice.toFixed(2)}` : 'pendiente de elegir la vuelta'}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.tripSummaryMeta}>
+                Total estimado: EUR {totalPrice.toFixed(2)} para {quantity} billetes
+              </Text>
+            )}
           </View>
 
           {/* Booking Type Selection */}
@@ -395,13 +436,18 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
                 onPress={() => {
                   setBookingType('ONEWAY')
                   setReturnTrip(null)
+                  setReturnResults([])
+                  setReturnSearchError('')
                 }}
               >
                 <Text style={[styles.segmentText, bookingType === 'ONEWAY' && styles.segmentTextActive]}>Solo ida</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.segmentBtn, bookingType === 'ROUNDTRIP' && styles.segmentBtnActive]}
-                onPress={() => setBookingType('ROUNDTRIP')}
+                onPress={() => {
+                  setBookingType('ROUNDTRIP')
+                  setSelectingLeg('return')
+                }}
               >
                 <Text style={[styles.segmentText, bookingType === 'ROUNDTRIP' && styles.segmentTextActive]}>Ida y vuelta</Text>
               </TouchableOpacity>
@@ -409,37 +455,44 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
           </View>
 
           {/* Return Trip Selection for Roundtrip */}
-          {bookingType === 'ROUNDTRIP' && selectingLeg === 'outbound' && (
+          {bookingType === 'ROUNDTRIP' && (
             <View style={styles.bookingCard}>
               <Text style={styles.bookingCardTitle}>Seleccionar viaje de vuelta</Text>
-              <TouchableOpacity style={styles.primaryBtn} onPress={onSelectReturnTrip} disabled={loadingReturn}>
-                <Text style={styles.primaryBtnText}>{loadingReturn ? 'Buscando...' : 'Buscar viajes de vuelta'}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {bookingType === 'ROUNDTRIP' && selectingLeg === 'return' && returnResults.length > 0 && (
-            <View style={styles.bookingCard}>
-              <Text style={styles.bookingCardTitle}>Viajes de vuelta disponibles</Text>
-              {returnResults.map((retTrip) => (
-                <View key={String(retTrip.id)} style={styles.tripOption}>
-                  <Text style={styles.tripOptionRoute}>
-                    {retTrip.origin} → {retTrip.destination}
-                  </Text>
-                  <Text style={styles.tripOptionMeta}>Salida: {formatDateTime(retTrip.departureAt)}</Text>
-                  <Text style={styles.tripOptionMeta}>Llegada: {formatDateTime(retTrip.arrivalAt)}</Text>
-                  <Text style={styles.tripOptionMeta}>EUR {Number(retTrip.basePrice || 0).toFixed(2)}/persona</Text>
-                  <TouchableOpacity
-                    style={styles.secondaryBtn}
-                    onPress={() => {
-                      setReturnTrip(retTrip)
-                      setSelectingLeg('outbound')
-                    }}
-                  >
-                    <Text style={styles.secondaryBtnText}>Elegir vuelta</Text>
-                  </TouchableOpacity>
+              {loadingReturn ? (
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator color="#F07820" />
+                  <Text style={styles.loadingText}>Buscando viajes de vuelta...</Text>
                 </View>
-              ))}
+              ) : returnSearchError ? (
+                <Text style={styles.emptyText}>{returnSearchError}</Text>
+              ) : returnResults.length === 0 ? (
+                <Text style={styles.emptyText}>No existen viajes de vuelta disponibles.</Text>
+              ) : (
+                returnResults.map((retTrip) => (
+                  <View key={String(retTrip.id)} style={styles.tripOption}>
+                    <Text style={styles.tripOptionRoute}>
+                      {retTrip.origin} → {retTrip.destination}
+                    </Text>
+                    <Text style={styles.tripOptionMeta}>Salida: {formatDateTime(retTrip.departureAt)}</Text>
+                    <Text style={styles.tripOptionMeta}>Llegada: {formatDateTime(retTrip.arrivalAt)}</Text>
+                    <Text style={styles.tripOptionMeta}>Precio: EUR {Number(retTrip.basePrice || 0).toFixed(2)} por persona</Text>
+                    <Text style={styles.tripOptionMeta}>Total para {quantity} billetes: EUR {(Number(retTrip.basePrice || 0) * quantity).toFixed(2)}</Text>
+                    <TouchableOpacity
+                      style={styles.secondaryBtn}
+                      onPress={() => {
+                        setReturnTrip(retTrip)
+                        setSelectingLeg('outbound')
+                      }}
+                    >
+                      <Text style={styles.secondaryBtnText}>Elegir vuelta</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+
+              <TouchableOpacity style={styles.secondaryBtn} onPress={loadReturnTrips} disabled={loadingReturn}>
+                <Text style={styles.secondaryBtnText}>{loadingReturn ? 'Buscando...' : 'Actualizar viajes de vuelta'}</Text>
+              </TouchableOpacity>
             </View>
           )}
 
