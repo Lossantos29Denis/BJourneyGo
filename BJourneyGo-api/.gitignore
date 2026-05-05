@@ -17,10 +17,11 @@ api.env
 # Build and compiled files
 dist/
 build/
-*.js
-!*.config.js
-src/**/*.js
-src/**/*.map
+out/
+
+# TypeScript
+*.tsbuildinfo
+*.map
 
 # Logs
 logs/
@@ -30,6 +31,10 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
 
 # IDE
 .vscode/
@@ -48,6 +53,16 @@ lerna-debug.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Temp files
+*.bak
+temp/
+tmp/
+
+# Certificates
+*.pem
+*.key
+*.cert
 
 # Runtime/temporary
 *.pid

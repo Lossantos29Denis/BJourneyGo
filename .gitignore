@@ -20,8 +20,6 @@ api.env
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
 *.sublime-project
 *.sublime-workspace
 
@@ -32,6 +30,7 @@ out/
 .next/
 .astro/
 web-build/
+.cache/
 
 # Logs
 logs/
@@ -43,22 +42,23 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Runtime/temporary files
-.env.local
 *.pid
 *.seed
 *.pid.lock
 temp/
 tmp/
+*.bak
 
 # Mobile/Expo specific
 .expo/
 .expo-shared/
-npm-debug.log
+expo-env.d.ts
 
 # iOS specific
 ios/Pods/
 ios/Podfile.lock
 ios/.xcode.env.local
+ios/.xcode.env
 *.xcworkspace/
 *.xcodeproj/xcuserdata/
 *.ipa
@@ -68,6 +68,7 @@ ios/.xcode.env.local
 android/.gradle/
 android/.idea/
 android/local.properties
+android/gradle.properties
 android/*.keystore
 android/*.jks
 *.apk
@@ -76,11 +77,8 @@ android/*.jks
 # Backend specific (API)
 coverage/
 .nyc_output/
-src/**/*.js
-!*.config.js
 
 # Web/Astro specific
-.cache/
 .vercel/
 .output/
 
@@ -91,12 +89,12 @@ src/**/*.js
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+Thumbs.db
 
-# Editor backup files
-*.bak
-*.swp
-*.swo
-*~
+# Certificates and keys
+*.pem
+*.key
+*.cert
 
 # Database
 *.db
