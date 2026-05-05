@@ -326,8 +326,12 @@ async function submitSearch(e) {
   selectingLeg = 'outbound'
   selectedOutboundTrip = null
 
-  if (!from || !to || !date) {
-    alert('Debes completar origen, destino y fecha de ida para buscar.')
+  if (!from || !to) {
+    alert('Debes completar origen y destino para buscar.')
+    return
+  }
+  if (bookingType === 'ROUNDTRIP' && !date) {
+    alert('Debes indicar la fecha de ida para ida y vuelta.')
     return
   }
   if (bookingType === 'ROUNDTRIP' && !returnDate) {
@@ -340,12 +344,12 @@ async function submitSearch(e) {
   }
 
   try {
-    apiTickets = await fetchTrips({
-      origin: from,
-      destination: to,
-      startDate: date,
-      endDate: date
-    })
+    const searchParams = { origin: from, destination: to }
+    if (date) {
+      searchParams.startDate = date
+      searchParams.endDate = date
+    }
+    apiTickets = await fetchTrips(searchParams)
     hasSearched = true
     applyClientFilters()
   } catch (err) {
