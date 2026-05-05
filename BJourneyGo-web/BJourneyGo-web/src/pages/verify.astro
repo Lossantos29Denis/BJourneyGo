@@ -1,0 +1,19 @@
+---
+import AuthLayout from '../layouts/AuthLayout.astro';
+import '../styles/verify.css';
+---
+
+<AuthLayout title="Cuenta verificada — BJourneyGo">
+  <main class="container">
+    <section class="verify-card" aria-live="polite">
+      <h1 id="verifyTitle">Verificando tu cuenta...</h1>
+      <p id="verifyMessage" class="verify-message">Estamos comprobando tu enlace.</p>
+      <div class="verify-actions">
+        <a id="verifyLoginLink" class="btn btn--primary" href="/login" style="display:none">Ir a iniciar sesion</a>
+        <a id="verifyAppHint" class="btn btn--ghost" href="/" style="display:none">Volver al inicio</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/verify.js"></script>
+</AuthLayout>

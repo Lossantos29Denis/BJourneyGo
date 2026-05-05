@@ -1,0 +1,301 @@
+.mis-viajes-page {
+  padding: 2rem 1rem 3rem;
+}
+
+.mis-viajes-card {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.mis-viajes-card h1 {
+  margin: 0;
+}
+
+.mis-viajes-subtitle {
+  color: var(--text-muted);
+  margin: .5rem 0 1rem;
+}
+
+.lookup-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: .75rem;
+  align-items: end;
+}
+
+.lookup-form label,
+.contact-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.lookup-form input,
+.contact-grid input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem .75rem;
+  font-size: .95rem;
+}
+
+.lookup-message {
+  margin-top: .8rem;
+  min-height: 1.2rem;
+  color: var(--text-muted);
+}
+
+.lookup-message.ok {
+  color: #15803d;
+}
+
+.lookup-message.error {
+  color: #b91c1c;
+}
+
+.reservation-panel {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.reservation-panel.is-hidden {
+  display: none;
+}
+
+.reservation-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.reservation-meta {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: .92rem;
+}
+
+.contact-form {
+  margin-top: .75rem;
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.contact-form h3 {
+  margin: 0 0 .65rem;
+  font-size: 1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  margin-bottom: .75rem;
+}
+
+.tickets-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: .85rem;
+}
+
+.ticket-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .85rem;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: .75rem;
+  background: rgba(255,255,255,0.8);
+}
+
+.ticket-item h4 {
+  margin: 0 0 .35rem;
+}
+
+.ticket-info p {
+  margin: .2rem 0;
+}
+
+.ticket-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-qr img {
+  width: 180px;
+  height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.qr-empty {
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+
+.btn-download-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  margin-top: .6rem;
+  padding: .35rem .85rem;
+  border: 1px solid var(--primary, #6366f1);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary, #6366f1);
+  font-size: .85rem;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-download-pdf:hover {
+  background: var(--primary, #6366f1);
+  color: #fff;
+}
+
+@media (max-width: 920px) {
+  .lookup-form {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── logged-in orders list ──────────────────────────────────────────────────── */
+.my-orders-loading {
+  color: var(--text-muted);
+  padding: .5rem 0 .75rem;
+}
+
+.no-orders {
+  color: var(--text-muted);
+  padding: .5rem 0 .75rem;
+}
+
+.no-orders a {
+  color: var(--primary);
+}
+
+.no-tickets {
+  color: var(--text-muted);
+  font-size: .9rem;
+  padding: .35rem 0;
+}
+
+.lookup-divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 1.5rem 0 1rem;
+  color: var(--text-muted);
+  font-size: .88rem;
+}
+
+.lookup-divider::before,
+.lookup-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+/* order accordion cards */
+.order-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: .65rem;
+}
+
+.order-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s;
+}
+
+.order-header:hover {
+  background: rgba(0,0,0,.03);
+}
+
+.order-header-left,
+.order-header-right {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+.order-ref {
+  font-family: monospace;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.order-route {
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.order-date {
+  color: var(--text-muted);
+  font-size: .82rem;
+}
+
+.order-total {
+  font-size: .92rem;
+  font-weight: 600;
+}
+
+.order-chevron {
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: transform .2s;
+  flex-shrink: 0;
+}
+
+.order-header[aria-expanded="true"] .order-chevron {
+  transform: rotate(180deg);
+}
+
+.order-body {
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--border);
+  background: rgba(255,255,255,.5);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: .18em .55em;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}

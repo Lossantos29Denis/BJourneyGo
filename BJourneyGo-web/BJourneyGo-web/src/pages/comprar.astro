@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/comprar.css';
+---
+
+<Layout title="Comprar billetes — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="buy-hero">
+        <h1>Comprar billetes</h1>
+      </section>
+
+      <section class="search-panel">
+        <form id="searchForm" class="search-form" aria-label="Buscar billetes" novalidate>
+          <div class="field">
+            <label for="tripType">Tipo de viaje</label>
+            <select id="tripType" name="tripType" aria-label="Tipo de viaje">
+              <option value="ONEWAY">Solo ida</option>
+              <option value="ROUNDTRIP">Ida y vuelta</option>
+            </select>
+          </div>
+          <div class="field"><label for="from">Origen</label><input id="from" name="from" type="text" placeholder="Ej. Madrid" required aria-required="true" minlength="2" aria-label="Ciudad de origen"/></div>
+          <div class="field"><label for="to">Destino</label><input id="to" name="to" type="text" placeholder="Ej. Barcelona" required aria-required="true" minlength="2" aria-label="Ciudad de destino"/></div>
+          <div class="field"><label for="date">Fecha ida</label><input id="date" name="date" type="date" required aria-required="true" aria-label="Fecha ida"/></div>
+          <div class="field" id="returnDateField"><label for="returnDate">Fecha vuelta</label><input id="returnDate" name="returnDate" type="date" aria-label="Fecha vuelta"/></div>
+          <div class="field"><label for="passengers">Personas</label><input id="passengers" name="passengers" type="number" min="1" step="1" value="1" required aria-required="true" aria-label="Cantidad de personas"/></div>
+          <div class="actions"><button type="submit" class="btn btn--primary">Buscar</button></div>
+        </form>
+      </section>
+
+      <section class="results-panel is-hidden" id="resultsPanel">
+        <div class="results-header" id="resultsHeader"></div>
+        <div class="results-layout">
+          <aside class="filters-panel" aria-label="Filtros de busqueda">
+            <div class="filters-title">Filtros</div>
+            <div class="filter-group">
+              <label>Precio</label>
+              <div class="range-row">
+                <input id="filterMinPrice" type="number" min="0" step="0.01" placeholder="Min" />
+                <input id="filterMaxPrice" type="number" min="0" step="0.01" placeholder="Max" />
+              </div>
+            </div>
+            <div class="filter-group">
+              <label>Hora de salida</label>
+              <div class="range-row">
+                <input id="filterTimeFrom" type="time" />
+                <input id="filterTimeTo" type="time" />
+              </div>
+            </div>
+            <div class="filter-group">
+              <label>Plazas minimas</label>
+              <input id="filterSeats" type="number" min="1" step="1" placeholder="Ej. 2" />
+            </div>
+            <div class="filter-group">
+              <label>Ordenar por</label>
+              <select id="sortBy">
+                <option value="recommend">Recomendado</option>
+                <option value="price_asc">Precio: menor a mayor</option>
+                <option value="price_desc">Precio: mayor a menor</option>
+                <option value="time_asc">Salida: mas temprano</option>
+                <option value="time_desc">Salida: mas tarde</option>
+                <option value="seats_desc">Mas plazas</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn--ghost" id="filtersReset">Restablecer filtros</button>
+          </aside>
+
+          <div class="tickets-grid" id="ticketsGrid" aria-live="polite">
+            <!-- Tickets will be rendered here by client-side JS -->
+          </div>
+        </div>
+      </section>
+      <div id="noResults" style="display:none;color:var(--muted);margin-top:1rem">No se han encontrado billetes que coincidan con la búsqueda.</div>
+
+    </main>
+  </div>
+
+  <dialog class="modal" id="detailsModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 id="modalTitle">Detalles del viaje</h3>
+        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Cerrar" onclick="window.__bjourneyCloseModal && window.__bjourneyCloseModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-row"><span>Ruta</span><strong id="modalRoute"></strong></div>
+        <div class="modal-row"><span>Código ruta</span><strong id="modalRouteCode"></strong></div>
+        <div class="modal-row"><span>Salida</span><strong id="modalTime"></strong></div>
+        <div class="modal-row"><span>Llegada</span><strong id="modalArrival"></strong></div>
+        <div class="modal-row"><span>Duracion</span><strong id="modalDuration"></strong></div>
+        <div class="modal-row"><span>Precio</span><strong id="modalPrice"></strong></div>
+        <div class="modal-row"><span>Plazas</span><strong id="modalSeats"></strong></div>
+        <p class="modal-desc" id="modalDesc"></p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="modalActionCloseBtn" data-close="true" onclick="window.__bjourneyCloseModal && window.__bjourneyCloseModal()">Cerrar</button>
+        <button type="button" class="btn btn--primary" id="modalChooseBtn" data-action="choose-trip" onclick="window.__bjourneyChooseTrip && window.__bjourneyChooseTrip()">Elegir</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="/src/scripts/comprar.js"></script>
+</Layout>

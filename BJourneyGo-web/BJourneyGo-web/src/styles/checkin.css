@@ -1,0 +1,162 @@
+.checkin-page {
+  padding: 2rem 1rem 3rem;
+}
+
+.checkin-card {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.checkin-card h1 {
+  margin: 0;
+}
+
+.checkin-subtitle {
+  color: var(--text-muted);
+  margin: .5rem 0 1rem;
+}
+
+.checkin-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: .75rem;
+  align-items: end;
+}
+
+.checkin-form label,
+.contact-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.checkin-form input,
+.contact-grid input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem .75rem;
+  font-size: .95rem;
+}
+
+.checkin-message {
+  margin-top: .8rem;
+  min-height: 1.2rem;
+  color: var(--text-muted);
+}
+
+.checkin-message.ok {
+  color: #15803d;
+}
+
+.checkin-message.error {
+  color: #b91c1c;
+}
+
+.reservation-panel {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.reservation-panel.is-hidden {
+  display: none;
+}
+
+.reservation-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.reservation-meta {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: .92rem;
+}
+
+.contact-form {
+  margin-top: .75rem;
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.contact-form h3 {
+  margin: 0 0 .65rem;
+  font-size: 1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  margin-bottom: .75rem;
+}
+
+.tickets-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: .85rem;
+}
+
+.ticket-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .85rem;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: .75rem;
+  background: rgba(255,255,255,0.8);
+}
+
+.ticket-item h4 {
+  margin: 0 0 .35rem;
+}
+
+.ticket-info p {
+  margin: .2rem 0;
+}
+
+.ticket-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-qr img {
+  width: 180px;
+  height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.qr-empty {
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+
+@media (max-width: 920px) {
+  .checkin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-item {
+    grid-template-columns: 1fr;
+  }
+}

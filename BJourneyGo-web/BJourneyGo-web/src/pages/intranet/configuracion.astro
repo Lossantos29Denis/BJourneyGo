@@ -1,0 +1,168 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-config.css';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (role === 'agency' || role === 'scanner') {
+      window.location.replace('/intranet');
+    }
+  }
+</script>
+
+<Layout title="Configuración del Sistema — Intranet BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Configuración del Sistema</h1>
+        <p class="lead">Gestiona la configuración general y parámetros del sistema.</p>
+      </section>
+
+      <div class="config-grid">
+        <!-- Configuración General -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24M19.78 19.78l-4.24-4.24m-5.08-5.08l-4.24-4.24"/>
+              </svg>
+            </div>
+            <h3>Configuración General</h3>
+          </div>
+          <p>Ajusta los parámetros generales del sistema y preferencias.</p>
+          <button class="btn btn-primary" id="btnGeneralConfig">Configurar</button>
+        </section>
+
+        <!-- Gestión de Datos -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <h3>Gestión de Base de Datos</h3>
+          </div>
+          <p>Realiza copias de seguridad, restaura datos y optimiza la BD.</p>
+          <button class="btn btn-primary" id="btnDatabaseConfig">Gestionar</button>
+        </section>
+
+        <!-- Seguridad -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <h3>Seguridad y Permisos</h3>
+          </div>
+          <p>Configura niveles de seguridad y permisos de acceso.</p>
+          <button class="btn btn-primary" id="btnSecurityConfig">Configurar</button>
+        </section>
+
+        <!-- Notificaciones -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </div>
+            <h3>Notificaciones</h3>
+          </div>
+          <p>Gestiona notificaciones, alertas y comunicaciones del sistema.</p>
+          <button class="btn btn-primary" id="btnNotificationsConfig">Configurar</button>
+        </section>
+
+        <!-- Integraciones -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/>
+                <line x1="12" y1="12" x2="20" y2="7.5"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <line x1="12" y1="12" x2="4" y2="7.5"/>
+              </svg>
+            </div>
+            <h3>Integraciones</h3>
+          </div>
+          <p>Conecta con servicios externos y APIs de terceros.</p>
+          <button class="btn btn-primary" id="btnIntegrationsConfig">Configurar</button>
+        </section>
+
+        <!-- Reportes y Logs -->
+        <section class="config-card">
+          <div class="config-header">
+            <div class="config-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="13" x2="12" y2="17"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <h3>Reportes y Logs</h3>
+          </div>
+          <p>Visualiza registros del sistema y genera reportes detallados.</p>
+          <button class="btn btn-primary" id="btnLogsConfig">Ver logs</button>
+        </section>
+      </div>
+
+      <!-- Panel de Estado del Sistema -->
+      <section class="system-status">
+        <h2>Estado del Sistema</h2>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-label">Versión del Sistema</div>
+            <div class="status-value" id="systemVersion">v1.0.0</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Estado del Servidor</div>
+            <div class="status-value status-ok">En línea</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Usuarios Activos</div>
+            <div class="status-value" id="activeUsers">--</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Última Actualización</div>
+            <div class="status-value" id="lastUpdate">--</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal para confirmar acciones -->
+  <div id="configModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Configuración</h2>
+        <button class="modal-close" id="closeConfigModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <p>Cargando configuración...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/scripts/intranet-config.js"></script>
+</Layout>

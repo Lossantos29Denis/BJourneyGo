@@ -1,0 +1,128 @@
+# Node modules (all sub-projects)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files - CRITICAL: Never commit credentials/secrets
+.env
+.env.local
+.env.*.local
+api.env
+.env.production
+.env.development
+.env.test
+.env.*.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# Build and dist folders
+dist/
+build/
+out/
+.next/
+.astro/
+web-build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime/temporary files
+.env.local
+*.pid
+*.seed
+*.pid.lock
+temp/
+tmp/
+
+# Mobile/Expo specific
+.expo/
+.expo-shared/
+npm-debug.log
+
+# iOS specific
+ios/Pods/
+ios/Podfile.lock
+ios/.xcode.env.local
+*.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.ipa
+*.dSYM
+
+# Android specific
+android/.gradle/
+android/.idea/
+android/local.properties
+android/*.keystore
+android/*.jks
+*.apk
+*.aab
+
+# Backend specific (API)
+coverage/
+.nyc_output/
+src/**/*.js
+!*.config.js
+
+# Web/Astro specific
+.cache/
+.vercel/
+.output/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Editor backup files
+*.bak
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+*.cert
+
+# Certificates and keys
+*.p8
+*.p12
+*.mobileprovision
+*.provisionprofile
+*.orig.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Metro
+.metro-health-check*
+
+# Kotlin
+.kotlin/
+
+# Test coverage
+coverage/
+.nyc_output/
+.coverage/

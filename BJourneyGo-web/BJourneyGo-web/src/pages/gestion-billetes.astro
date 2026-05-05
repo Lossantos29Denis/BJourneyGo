@@ -1,0 +1,541 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (role === 'scanner') {
+      window.location.replace('/intranet/escaner-qr');
+    }
+  }
+</script>
+
+<Layout title="Gestión de Billetes — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="tickets-hero">
+        <div class="hero-header">
+          <a href="/intranet" class="back-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver a Intranet
+          </a>
+          <h1>Gestión de Billetes y Rutas</h1>
+          <p class="lead">Administra rutas, horarios, precios y disponibilidad de billetes.</p>
+        </div>
+      </section>
+
+      <!-- Acciones rápidas -->
+      <div class="quick-actions">
+        <button class="action-btn action-btn--primary" id="createRouteBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nueva ruta
+        </button>
+      </div>
+
+      <!-- Filtros y búsqueda -->
+      <div class="filters-section">
+        <div class="search-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar por origen, destino, código de ruta..." />
+        </div>
+        <div class="filter-controls">
+          <select id="statusFilter" class="filter-select">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activas</option>
+            <option value="inactive">Inactivas</option>
+            <option value="maintenance">En mantenimiento</option>
+          </select>
+          <select id="typeFilter" class="filter-select">
+            <option value="all">Todos los tipos</option>
+            <option value="express">Express</option>
+            <option value="standard">Estándar</option>
+            <option value="night">Nocturno</option>
+          </select>
+          <button class="filter-btn" id="clearFiltersBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Rutas activas</span>
+          <span class="stat-value" id="activeRoutes">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Horarios hoy</span>
+          <span class="stat-value" id="todaySchedules">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Billetes disponibles</span>
+          <span class="stat-value" id="availableTickets">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Ocupación promedio</span>
+          <span class="stat-value" id="avgOccupancy">0%</span>
+        </div>
+      </div>
+
+      <!-- Tabla de rutas -->
+      <section class="routes-table-section">
+        <div class="section-header">
+          <h3>Rutas disponibles</h3>
+          <div class="view-switcher">
+            <button class="view-btn active" data-view="table">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+              </svg>
+            </button>
+            <button class="view-btn" data-view="grid">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-view" id="tableView">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Ruta</th>
+                  <th>Tipo</th>
+                  <th>Duración</th>
+                  <th>Precio</th>
+                  <th>Capacidad</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="routesTableBody">
+                <tr>
+                  <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Cargando rutas...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-view" id="gridView" style="display: none;">
+          <div id="routesGridContainer" class="routes-grid">
+            <!-- Las tarjetas se generarán dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Paginación -->
+      <div class="pagination">
+        <button class="pagination-btn" id="prevPage" disabled>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Anterior
+        </button>
+        <div class="pagination-info">
+          Página <span id="currentPage">1</span> de <span id="totalPages">1</span>
+        </div>
+        <button class="pagination-btn" id="nextPage">
+          Siguiente
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabla de horarios -->
+      <section class="routes-table-section">
+        <div class="section-header">
+          <h3>Horarios programados</h3>
+          <button class="action-btn action-btn--primary" id="createScheduleBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nuevo horario
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ruta</th>
+                <th>Salida</th>
+                <th>Llegada</th>
+                <th>Precio</th>
+                <th>Ocupación</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tripsTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  Cargando horarios...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar ruta -->
+  <div class="modal" id="routeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nueva ruta</h3>
+        <button class="modal-close" id="closeModal">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="routeForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="routeCode">Código de ruta *</label>
+            <input type="text" id="routeCode" placeholder="MAD-BCN-001" required />
+          </div>
+          <div class="form-group">
+            <label for="routeType">Tipo de servicio *</label>
+            <select id="routeType" required>
+              <option value="">Seleccionar...</option>
+              <option value="express">Express</option>
+              <option value="standard">Estándar</option>
+              <option value="night">Nocturno</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="origin">Origen *</label>
+            <input type="text" id="origin" placeholder="Madrid" required />
+          </div>
+          <div class="form-group">
+            <label for="destination">Destino *</label>
+            <input type="text" id="destination" placeholder="Barcelona" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duración (minutos) *</label>
+            <input type="number" id="duration" placeholder="240" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="distance">Distancia (km)</label>
+            <input type="number" id="distance" placeholder="620" min="1" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price">Precio base (€) *</label>
+            <input type="number" id="price" placeholder="25.00" step="0.01" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="capacity">Capacidad (asientos) *</label>
+            <input type="number" id="capacity" placeholder="50" min="1" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="stops">Paradas intermedias</label>
+          <input type="text" id="stops" placeholder="Zaragoza, Lleida" />
+          <small>Separar por comas</small>
+        </div>
+
+        <div class="form-group">
+          <label for="amenities">Servicios incluidos</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="amenity" value="wifi" /> Wi-Fi</label>
+            <label><input type="checkbox" name="amenity" value="ac" /> Aire acondicionado</label>
+            <label><input type="checkbox" name="amenity" value="wc" /> Baño</label>
+            <label><input type="checkbox" name="amenity" value="usb" /> Cargador USB</label>
+            <label><input type="checkbox" name="amenity" value="food" /> Comida</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Estado</label>
+          <select id="status">
+            <option value="active">Activa</option>
+            <option value="inactive">Inactiva</option>
+            <option value="maintenance">En mantenimiento</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar ruta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para crear horario (trip) -->
+  <div class="modal" id="scheduleModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Nuevo horario</h3>
+        <button class="modal-close" id="closeScheduleModal">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="scheduleForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scheduleRoute">Ruta *</label>
+            <select id="scheduleRoute" required></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scheduleDeparture">Salida *</label>
+            <input type="datetime-local" id="scheduleDeparture" required />
+            <div class="datetime-tools">
+              <button type="button" class="mini-btn" id="scheduleDeparturePlus15">+15m</button>
+              <button type="button" class="mini-btn" id="scheduleDeparturePlus30">+30m</button>
+              <button type="button" class="mini-btn" id="scheduleDeparturePlus60">+60m</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="scheduleArrival">Llegada *</label>
+            <input type="datetime-local" id="scheduleArrival" required />
+            <div class="datetime-tools">
+              <button type="button" class="mini-btn" id="scheduleAutoArrivalBtn">Calcular llegada</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scheduleCapacity">Capacidad *</label>
+            <input type="number" id="scheduleCapacity" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="schedulePrice">Precio base (€) *</label>
+            <input type="number" id="schedulePrice" min="0" step="0.01" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scheduleStatus">Estado</label>
+            <select id="scheduleStatus">
+              <option value="SCHEDULED">Programado</option>
+              <option value="COMPLETED">Completado</option>
+              <option value="CANCELLED">Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+              <input type="checkbox" id="scheduleCreateReturn" />
+              Crear también viaje de vuelta
+            </label>
+          </div>
+        </div>
+
+        <div id="returnTripFields" style="display:none">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="scheduleReturnRoute">Ruta de vuelta *</label>
+              <select id="scheduleReturnRoute"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="scheduleReturnDeparture">Salida vuelta *</label>
+              <input type="datetime-local" id="scheduleReturnDeparture" />
+              <div class="datetime-tools">
+                <button type="button" class="mini-btn" id="scheduleReturnDeparturePlus15">+15m</button>
+                <button type="button" class="mini-btn" id="scheduleReturnDeparturePlus30">+30m</button>
+                <button type="button" class="mini-btn" id="scheduleReturnDeparturePlus60">+60m</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="scheduleReturnArrival">Llegada vuelta *</label>
+              <input type="datetime-local" id="scheduleReturnArrival" />
+              <div class="datetime-tools">
+                <button type="button" class="mini-btn" id="scheduleAutoReturnArrivalBtn">Calcular llegada vuelta</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="scheduleReturnPrice">Precio base vuelta (€)</label>
+              <input type="number" id="scheduleReturnPrice" min="0" step="0.01" />
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelScheduleBtn">Cancelar</button>
+        <button type="submit" form="scheduleForm" class="btn btn-primary">Guardar horario</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .page-wrapper{min-height:calc(100vh - 160px);display:flex;flex-direction:column}
+    .page-content{flex:1;padding-bottom:3rem}
+
+    .tickets-hero{margin:2rem 0;text-align:center}
+    .hero-header{max-width:800px;margin:0 auto}
+    .back-link{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.95rem;margin-bottom:1rem;transition:color .2s;text-decoration:none}
+    .back-link:hover{color:var(--accent-1)}
+    .tickets-hero h1{margin:.5rem 0;color:var(--accent-1);font-size:2rem;font-weight:700;letter-spacing:-0.5px}
+    .lead{color:var(--text-muted);margin:.5rem auto 2rem auto;font-size:1.05rem}
+
+    /* Quick Actions */
+    .quick-actions{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .action-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;font-weight:500;cursor:pointer;transition:all .2s}
+    .action-btn:hover{background:var(--bg-muted);border-color:var(--accent-1);transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+    .action-btn--primary{background:var(--accent-1);border-color:var(--accent-1);color:white}
+    .action-btn--primary:hover{background:#ea580c;border-color:#ea580c}
+
+    /* Filters */
+    .filters-section{background:var(--card);padding:1.25rem;border-radius:14px;border:1px solid var(--border);margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap}
+    .search-box{flex:1;min-width:280px;position:relative;display:flex;align-items:center}
+    .search-box svg{position:absolute;left:1rem;color:var(--text-muted);pointer-events:none}
+    .search-box input{width:100%;padding:.75rem 1rem .75rem 3rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem}
+    .search-box input:focus{outline:none;border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
+    
+    .filter-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+    .filter-select{padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem;cursor:pointer}
+    .filter-select:focus{outline:none;border-color:var(--accent-1)}
+    .filter-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-size:.9rem;cursor:pointer;transition:all .2s}
+    .filter-btn:hover{background:var(--bg-muted);color:var(--text)}
+
+    .datetime-tools{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+    .mini-btn{border:1px solid var(--border);background:var(--bg);color:var(--text-muted);padding:.25rem .55rem;border-radius:8px;font-size:.78rem;cursor:pointer}
+    .mini-btn:hover{border-color:var(--accent-1);color:var(--accent-1)}
+
+    /* Stats Row */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--card);padding:1.25rem;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem}
+    .stat-label{color:var(--text-muted);font-size:.85rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .stat-value{color:var(--accent-1);font-size:1.75rem;font-weight:700}
+
+    /* Table Section */
+    .routes-table-section{background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);margin-bottom:1.5rem}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+    .section-header h3{margin:0;color:var(--text);font-size:1.15rem;font-weight:600}
+    
+    .view-switcher{display:flex;gap:.5rem}
+    .view-btn{padding:.5rem;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+    .view-btn:hover{background:var(--bg-muted);color:var(--text)}
+    .view-btn.active{background:var(--accent-1);border-color:var(--accent-1);color:white}
+
+    .table-responsive{overflow-x:auto}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th,.data-table td{padding:.85rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .data-table th{color:var(--text-muted);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;background:var(--bg-muted)}
+    .data-table td{color:var(--text);font-size:.95rem}
+    .data-table tr:hover{background:var(--bg-muted)}
+    
+    .status-badge{display:inline-block;padding:.35rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+    .status-badge.active{background:rgba(34,197,94,0.1);color:#22c55e}
+    .status-badge.inactive{background:rgba(148,163,184,0.1);color:#94a3b8}
+    .status-badge.maintenance{background:rgba(251,191,36,0.1);color:#fbbf24}
+    .status-badge.scheduled{background:rgba(59,130,246,0.12);color:#3b82f6}
+    .status-badge.completed{background:rgba(16,185,129,0.12);color:#10b981}
+    .status-badge.cancelled{background:rgba(239,68,68,0.12);color:#ef4444}
+
+    .action-icons{display:flex;gap:.5rem}
+    .icon-btn{padding:.4rem;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+    .icon-btn:hover{background:var(--accent-1);border-color:var(--accent-1);color:white}
+
+    /* Grid View */
+    .routes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem}
+    .route-card{background:var(--bg);padding:1.5rem;border-radius:12px;border:1px solid var(--border);transition:all .25s}
+    .route-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px var(--shadow-hover);border-color:var(--accent-1)}
+    .route-card-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem}
+    .route-code{color:var(--text);font-size:1.1rem;font-weight:700}
+    .route-card-body{display:flex;flex-direction:column;gap:.75rem}
+    .route-info{display:flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem}
+    .route-price{color:var(--accent-1);font-size:1.35rem;font-weight:700}
+
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:1rem;margin-top:1.5rem}
+    .pagination-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;cursor:pointer;transition:all .2s}
+    .pagination-btn:hover:not(:disabled){background:var(--accent-1);border-color:var(--accent-1);color:white}
+    .pagination-btn:disabled{opacity:.4;cursor:not-allowed}
+    .pagination-info{color:var(--text-muted);font-size:.95rem}
+
+    /* Modal */
+    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+    .modal.active{display:flex}
+    .modal-content{background:var(--card);border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:700px;width:100%;max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid var(--border)}
+    .modal-header h3{margin:0;color:var(--text);font-size:1.25rem;font-weight:600}
+    .modal-close{padding:.5rem;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:all .2s;display:flex}
+    .modal-close:hover{background:var(--bg-muted);color:var(--text)}
+
+    .modal-form{padding:1.5rem}
+    .form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1rem}
+    .form-group{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+    .form-group label{color:var(--text);font-size:.9rem;font-weight:500}
+    .form-group small{color:var(--text-muted);font-size:.85rem}
+    .form-group input,.form-group select{padding:.75rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem}
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent-1);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
+    
+    .checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+    .checkbox-group label{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.9rem;font-weight:normal;cursor:pointer}
+    .checkbox-group input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
+
+    .form-actions{display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+
+    @media (max-width:900px){
+      .filters-section{flex-direction:column}
+      .search-box{min-width:100%}
+      .form-row{grid-template-columns:1fr}
+      .routes-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:620px){
+      .tickets-hero{margin:1.5rem 0}
+      .tickets-hero h1{font-size:1.5rem}
+      .quick-actions{gap:.5rem}
+      .action-btn{padding:.6rem 1rem;font-size:.9rem}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .routes-table-section{padding:1rem}
+      .data-table th,.data-table td{padding:.65rem .5rem;font-size:.85rem}
+      .checkbox-group{grid-template-columns:1fr}
+    }
+
+    @media (max-width:480px){
+      .stats-row{grid-template-columns:1fr}
+      .stat-value{font-size:1.5rem}
+      .modal-content{max-height:95vh}
+      .form-actions{flex-direction:column}
+      .form-actions button{width:100%}
+    }
+  </style>
+
+  <script type="module" src="/src/scripts/gestion-billetes.js"></script>
+</Layout>

@@ -1,0 +1,285 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/landing.css';
+import { Image } from 'astro:assets';
+import bjournetLogo from '../assets/bjournet-removebg-preview.png';
+---
+
+<Layout title="BJourneyGo — Gestión de Rutas y Transportes">
+  <div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>Bienvenido a BJourneyGo</h1>
+          <p class="hero-subtitle">Solución integral de gestión de rutas y transportes para tu negocio</p>
+          <div class="hero-buttons">
+            <a href="/comprar" class="btn btn-primary btn-large">Acceder a la Plataforma</a>
+            <a href="#contact" class="btn btn-secondary btn-large">Contacta con Nosotros</a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <Image src={bjournetLogo} alt="Logo BJourneyGo" class="hero-logo" quality="max" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Características Principales -->
+    <section class="features" id="features">
+      <div class="container">
+        <h2>¿Por Qué Elegir BJourneyGo?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
+            </div>
+            <h3>Gestión de Rutas y Viajes</h3>
+            <p>Crea, edita y programa rutas y viajes completos con control total de capacidad, precios y horarios.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                <path d="M8 12h8M12 8v8"/>
+              </svg>
+            </div>
+            <h3>Panel de Control Intuitivo</h3>
+            <p>Interfaz completa para administradores y agencias: rutas, viajes, usuarios, turnos y estadísticas en un solo lugar.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            </div>
+            <h3>Compra de Billetes Online</h3>
+            <p>Proceso de compra integrado con Stripe: datos de pasajeros y recibo PDF por email.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v4"/>
+              </svg>
+            </div>
+            <h3>Seguridad y Autenticación</h3>
+            <p>Registro con verificación por email, JWT con renovación automática, control de acceso por roles y auditoría completa.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M7 7h.01M7 11h.01M7 15h.01M11 7h6M11 11h6M11 15h6"/>
+              </svg>
+            </div>
+            <h3>Verificación por Código QR</h3>
+            <p>Cada billete genera un QR único. Verificación digital en el punto de embarque con registro de auditoría.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Gestión de Agencias y Turnos</h3>
+            <p>Soporte multi-agencia con gestión de trabajadores, calendario de turnos, documentos y configuración por agencia.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre Nosotros -->
+    <section class="about" id="about">
+      <div class="container">
+        <div class="about-content">
+          <div class="about-text">
+            <h2>Sobre BJourneyGo</h2>
+            <p>
+              BJourneyGo es una plataforma especializada en la gestión integral de rutas y transportes, 
+              diseñada para empresas que buscan optimizar sus operaciones logísticas.
+            </p>
+            <p>
+              Nuestro equipo de expertos en logística y tecnología ha desarrollado una solución que 
+              combina inteligencia artificial con interfaces intuitivas, permitiendo que negocios de 
+              cualquier tamaño mejoren su eficiencia operacional.
+            </p>
+            <p>
+              Desde pequeñas empresas de mensajería hasta grandes operadores logísticos, 
+              BJourneyGo ayuda a empresas a:
+            </p>
+            <ul class="benefits-list">
+              <li>Gestionar rutas y viajes con control total de capacidad y precios</li>
+              <li>Vender billetes online con pago seguro mediante Stripe</li>
+              <li>Verificar billetes digitalmente mediante códigos QR</li>
+              <li>Consultar estadísticas reales: ingresos, ocupación y ventas</li>
+              <li>Gestionar trabajadores, turnos y documentos por agencia</li>
+              <li>Acceder desde Web y App Móvil con autenticación segura</li>
+            </ul>
+          </div>
+          <div class="about-image">
+            <img src="/Incremento.png" alt="Crecimiento BJourneyGo" class="about-img" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Servicios -->
+    <section class="services" id="services">
+      <div class="container">
+        <h2>Nuestros Servicios</h2>
+        <div class="services-grid">
+          <div class="service-item">
+            <h3>Gestión de Rutas y Viajes</h3>
+            <p>Creación y administración de rutas, viajes programados, autobuses y capacidad de asientos.</p>
+          </div>
+          <div class="service-item">
+            <h3>Venta de Billetes Online</h3>
+            <p>Búsqueda de viajes por origen, destino y fecha, selección de asientos y pago seguro con Stripe.</p>
+          </div>
+          <div class="service-item">
+            <h3>Estadísticas y Analítica</h3>
+            <p>Dashboard con ingresos mensuales, billetes vendidos, tasa de ocupación y análisis de ventas por franja horaria.</p>
+          </div>
+          <div class="service-item">
+            <h3>Gestión de Documentos</h3>
+            <p>Repositorio centralizado de documentos internos: políticas, manuales y recursos por agencia.</p>
+          </div>
+          <div class="service-item">
+            <h3>Calendario de Turnos</h3>
+            <p>Planificación de turnos de trabajadores (mañana, tarde, noche, descanso, vacaciones) con vista de calendario.</p>
+          </div>
+          <div class="service-item">
+            <h3>Verificación de Billetes por QR</h3>
+            <p>Validación digital de billetes en el momento del embarque con registro de auditoría y soporte offline.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Estadísticas -->
+    <section class="stats" id="stats">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-number">Web + App</div>
+            <div class="stat-label">Plataforma Móvil y de Escritorio</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">Stripe</div>
+            <div class="stat-label">Pagos Online Seguros Integrados</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">QR</div>
+            <div class="stat-label">Verificación Digital de Billetes</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <h2>¿Listo para Optimizar tus Operaciones?</h2>
+        <p>Únete a cientos de empresas que ya están mejorando su eficiencia con BJourneyGo</p>
+        <div class="cta-buttons">
+          <a href="/comprar" class="btn btn-primary btn-large">Acceder Ahora</a>
+          <a href="#contact" class="btn btn-secondary btn-large">Solicitar Demo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contacto -->
+    <section class="contact" id="contact">
+      <div class="container">
+        <h2>Contacta con Nosotros</h2>
+        <div class="contact-content">
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Ubicación</h3>
+                <p>Calle Principal 123, Barcelona, España</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Teléfono</h3>
+                <p>+34 912 345 678</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="M7 9l5 4 5-4"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Email</h3>
+                <p>bjourneygo@gmail.com</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Horario</h3>
+                <p>Lun - Vie: 9:00 - 18:00<br/>Sáb - Dom: Cerrado</p>
+              </div>
+            </div>
+          </div>
+
+          <form class="contact-form" id="contactForm">
+            <div class="form-group">
+              <label for="name">Nombre</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="subject">Asunto</label>
+              <input type="text" id="subject" name="subject" required>
+            </div>
+            <div class="form-group">
+              <label for="message">Mensaje</label>
+              <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="/src/scripts/landing.js"></script>
+</Layout>

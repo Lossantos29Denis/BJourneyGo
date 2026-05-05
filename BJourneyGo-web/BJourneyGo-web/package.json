@@ -1,0 +1,18 @@
+{
+  "name": "nebulous-nadir",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.1",
+    "astro": "^5.16.3"
+  },
+  "devDependencies": {
+    "baseline-browser-mapping": "^2.9.19"
+  }
+}

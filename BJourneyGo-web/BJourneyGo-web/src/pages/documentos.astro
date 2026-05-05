@@ -1,0 +1,51 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/intranet-documentos.css';
+---
+
+<Layout title="Documentos — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/">← Volver al inicio</a>
+        </div>
+        <h1>Documentos Publicos</h1>
+        <p class="lead">Documentos y recursos disponibles para clientes y publico general.</p>
+      </section>
+
+      <div class="search-section">
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar documentos..." class="search-input">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="todos">Todos</button>
+          <button class="filter-btn" data-filter="politicas">Politicas</button>
+          <button class="filter-btn" data-filter="manuales">Manuales</button>
+          <button class="filter-btn" data-filter="recursos">Recursos</button>
+        </div>
+      </div>
+
+      <div class="documents-container" id="documentsContainer">
+        <section class="documents-category" data-category="politicas">
+          <h2>Politicas</h2>
+          <div class="documents-grid" id="docsPoliticas"></div>
+        </section>
+        <section class="documents-category" data-category="manuales">
+          <h2>Manuales</h2>
+          <div class="documents-grid" id="docsManuales"></div>
+        </section>
+        <section class="documents-category" data-category="recursos">
+          <h2>Recursos</h2>
+          <div class="documents-grid" id="docsRecursos"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/scripts/documentos-publicos.js"></script>
+</Layout>

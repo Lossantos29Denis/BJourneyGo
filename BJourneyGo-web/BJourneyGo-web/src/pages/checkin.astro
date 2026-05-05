@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/checkin.css';
+---
+
+<Layout title="Check-in — BJourneyGo">
+  <main class="checkin-page container">
+    <section class="checkin-card">
+      <h1>Check-in de reserva</h1>
+      <p class="checkin-subtitle">Accede con tu correo o teléfono de contacto y tu código de referencia.</p>
+
+      <form id="checkinLookupForm" class="checkin-form" novalidate>
+        <label>
+          Correo o teléfono
+          <input id="identifier" name="identifier" type="text" placeholder="correo@ejemplo.com o +34 600 000 000" required />
+        </label>
+        <label>
+          Código de referencia
+          <input id="referenceCode" name="referenceCode" type="text" placeholder="BJ-XXXXXXX" required />
+        </label>
+        <button type="submit" class="btn btn--primary" id="lookupBtn">Consultar reserva</button>
+      </form>
+
+      <div id="checkinMessage" class="checkin-message" role="status" aria-live="polite"></div>
+
+      <section id="reservationPanel" class="reservation-panel is-hidden" aria-live="polite">
+        <div class="reservation-head">
+          <h2>Tu reserva</h2>
+          <div id="reservationMeta" class="reservation-meta"></div>
+        </div>
+
+        <form id="contactUpdateForm" class="contact-form" novalidate>
+          <h3>Actualizar datos de contacto</h3>
+          <div class="contact-grid">
+            <label>
+              Nuevo correo
+              <input id="contactEmail" name="contactEmail" type="email" placeholder="correo@ejemplo.com" />
+            </label>
+            <label>
+              Nuevo teléfono
+              <input id="contactPhone" name="contactPhone" type="tel" placeholder="+34 600 000 000" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn--ghost" id="updateContactBtn">Guardar contacto</button>
+        </form>
+
+        <div id="ticketsList" class="tickets-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/checkin.js"></script>
+</Layout>

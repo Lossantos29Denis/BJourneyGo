@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/comprar-pasajeros.css';
+---
+
+<Layout title="Datos de pasajeros — BJourneyGo">
+  <main class="passengers-page container">
+    <section class="passengers-card">
+      <h1>Datos de pasajeros</h1>
+      <p class="passengers-subtitle" id="tripSummary">Cargando información del viaje…</p>
+
+      <div class="trip-pricing" id="tripPricing" aria-live="polite"></div>
+      <div class="trip-warning" id="tripWarning" role="alert"></div>
+
+      <form id="passengersForm" class="passengers-form" novalidate>
+        <div id="passengersList" class="passengers-list"></div>
+        <div class="form-actions">
+          <a href="/comprar" class="btn btn--ghost">Volver</a>
+          <button type="button" id="testPurchaseBtn" class="btn btn--test">🧪 Compra de prueba</button>
+          <button type="submit" id="submitBtn" class="btn btn--primary">Continuar al pago</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/comprar-pasajeros.js"></script>
+</Layout>

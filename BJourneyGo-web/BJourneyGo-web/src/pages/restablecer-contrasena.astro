@@ -1,0 +1,45 @@
+---
+import AuthLayout from '../layouts/AuthLayout.astro';
+import '../styles/verify.css';
+---
+
+<AuthLayout title="Restablecer contraseña — BJourneyGo">
+  <main class="container">
+    <section class="verify-card" aria-live="polite">
+      <h1 id="pageTitle">Nueva contraseña</h1>
+      <p class="verify-message" id="subtitle">Elige una contraseña nueva para tu cuenta.</p>
+
+      <form id="resetForm" novalidate style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1rem">
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Nueva contraseña (mínimo 6 caracteres)"
+          required
+          minlength="6"
+          autocomplete="new-password"
+          style="border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.95rem;background:rgba(255,255,255,0.06);color:inherit;width:100%"
+        />
+        <input
+          id="confirm"
+          name="confirm"
+          type="password"
+          placeholder="Repite la contraseña"
+          required
+          minlength="6"
+          autocomplete="new-password"
+          style="border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.95rem;background:rgba(255,255,255,0.06);color:inherit;width:100%"
+        />
+        <button type="submit" class="btn btn--primary" id="submitBtn" style="width:100%">Cambiar contraseña</button>
+      </form>
+
+      <p id="statusMsg" style="display:none" class="verify-message"></p>
+
+      <div class="verify-actions" id="loginAction" style="display:none;margin-top:0.5rem">
+        <a href="/login" class="btn btn--primary">Ir a iniciar sesión</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/restablecer-contrasena.js"></script>
+</AuthLayout>

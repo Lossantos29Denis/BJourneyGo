@@ -1,0 +1,24 @@
+-- Migration: make Trip.bus_id optional
+
+SET @fk := (
+  SELECT CONSTRAINT_NAME
+  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'Trip'
+    AND COLUMN_NAME = 'bus_id'
+    AND REFERENCED_TABLE_NAME = 'Bus'
+  LIMIT 1
+);
+
+SET @ddl_drop := IF(@fk IS NULL, 'SELECT 1', CONCAT('ALTER TABLE `Trip` DROP FOREIGN KEY `', @fk, '`'));
+PREPARE stmt_drop FROM @ddl_drop;
+EXECUTE stmt_drop;
+DEALLOCATE PREPARE stmt_drop;
+
+ALTER TABLE `Trip`
+  MODIFY `bus_id` INT NULL;
+
+ALTER TABLE `Trip`
+  ADD CONSTRAINT `fk_trip_bus`
+  FOREIGN KEY (`bus_id`) REFERENCES `Bus`(`id`)
+  ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-operadores-scanner.css';
+---
+
+<script is:inline>
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    const isAdmin = localStorage.getItem('intranetIsAdmin') === 'true' || role === 'admin' || role === 'ADMIN';
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (!isAdmin && role !== 'agency') {
+      window.location.replace('/intranet');
+    }
+  }
+</script>
+
+<Layout title="Operadores Scanner — BJourneyGo Intranet">
+  <main class="operators-page container">
+    <section class="page-head">
+      <a href="/intranet" class="back-link">← Volver a Intranet</a>
+      <h1>Operadores Scanner</h1>
+      <p>Subapartado dedicado para configurar qué operadores pueden escanear y a qué viajes tienen acceso.</p>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Operador</h2>
+        <p class="hint">Selecciona un usuario con permiso scanner para editar sus viajes permitidos.</p>
+        <div class="field">
+          <label for="operatorSelect">Usuario operador</label>
+          <select id="operatorSelect">
+            <option value="">Cargando operadores...</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button class="btn btn--ghost" id="reloadBtn" type="button">Recargar</button>
+          <a class="btn btn--primary" href="/gestion-usuarios">Crear usuario scanner</a>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Viajes permitidos</h2>
+        <p class="hint">Estos viajes serán los únicos que el operador verá en la app móvil para leer QR.</p>
+        <div class="actions" style="margin-bottom:.6rem;">
+          <button class="btn btn--ghost" id="selectAllBtn" type="button">Seleccionar visibles</button>
+          <button class="btn btn--ghost" id="clearAllBtn" type="button">Limpiar</button>
+          <button class="btn btn--primary" id="saveBtn" type="button">Guardar permisos</button>
+        </div>
+        <div id="tripList" class="trip-list"></div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/intranet-operadores-scanner.js"></script>
+</Layout>

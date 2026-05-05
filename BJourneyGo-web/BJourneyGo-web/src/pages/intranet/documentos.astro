@@ -1,0 +1,136 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-documentos.css';
+---
+
+<script is:inline>
+  // Verificar autenticación de intranet antes de renderizar
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (role === 'agency' || role === 'scanner') {
+      window.location.replace('/intranet');
+    }
+  }
+</script>
+
+<Layout title="Documentos Internos — Intranet BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Documentos Internos</h1>
+        <p class="lead">Políticas, manuales y recursos para empleados de BJourneyGo.</p>
+      </section>
+
+      <!-- Buscador y Filtros -->
+      <div class="search-section">
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar documentos..." class="search-input">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="todos">Todos</button>
+          <button class="filter-btn" data-filter="politicas">Políticas</button>
+          <button class="filter-btn" data-filter="manuales">Manuales</button>
+          <button class="filter-btn" data-filter="recursos">Recursos</button>
+        </div>
+      </div>
+
+      <div class="admin-actions" id="adminActions" style="display:none;">
+        <button class="btn btn-primary" id="createDocBtn">Nuevo documento</button>
+      </div>
+
+      <div class="documents-container" id="documentsContainer">
+        <section class="documents-category" data-category="politicas">
+          <h2>Políticas de la Empresa</h2>
+          <div class="documents-grid" id="docsPoliticas"></div>
+        </section>
+        <section class="documents-category" data-category="manuales">
+          <h2>Manuales y Guías</h2>
+          <div class="documents-grid" id="docsManuales"></div>
+        </section>
+        <section class="documents-category" data-category="recursos">
+          <h2>Recursos y Formularios</h2>
+          <div class="documents-grid" id="docsRecursos"></div>
+        </section>
+      </div>
+
+      <!-- Panel de Estadísticas -->
+      <section class="documents-stats">
+        <h2>Información de Documentos</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number" id="statTotal">0</div>
+            <div class="stat-label">Documentos Totales</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statPoliticas">0</div>
+            <div class="stat-label">Políticas</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statManuales">0</div>
+            <div class="stat-label">Manuales</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statRecursos">0</div>
+            <div class="stat-label">Formularios</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="documentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="documentModalTitle">Nuevo documento</h2>
+        <button class="modal-close" id="closeDocumentModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="documentForm" class="modal-body">
+        <input type="hidden" id="documentId">
+        <div class="form-group">
+          <label for="documentTitle">Titulo *</label>
+          <input type="text" id="documentTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="documentCategory">Categoria *</label>
+          <select id="documentCategory" required>
+            <option value="POLITICAS">Politicas</option>
+            <option value="MANUALES">Manuales</option>
+            <option value="RECURSOS">Recursos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="documentFile">Archivo</label>
+          <input type="file" id="documentFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip">
+        </div>
+        <div class="form-group">
+          <label for="documentSize">Tamano</label>
+          <input type="text" id="documentSize" placeholder="2.4 MB" readonly>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label for="documentDescription">Descripcion</label>
+          <textarea id="documentDescription"></textarea>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDocumentBtn">Cancelar</button>
+        <button type="submit" form="documentForm" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/scripts/intranet-documentos.js"></script>
+</Layout>

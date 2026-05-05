@@ -1,0 +1,74 @@
+# Node modules
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+
+# Generated types
+.astro/
+.cache/
+
+# Environment variables - CRITICAL: Never commit
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Runtime/temporary
+*.pid
+*.seed
+*.pid.lock
+temp/
+tmp/
+
+# Astro deployment
+.vercel/
+.output/
+
+# Testing and coverage
+coverage/
+.nyc_output/
+
+# Temp/backup files
+*.bak
+*.tmp
+*~
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*

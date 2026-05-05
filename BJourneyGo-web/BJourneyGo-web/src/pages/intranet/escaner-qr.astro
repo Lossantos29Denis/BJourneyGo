@@ -1,0 +1,94 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/intranet-escaner-qr.css';
+---
+
+<script is:inline>
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    const scannerEnabled = localStorage.getItem('intranetScannerEnabled') === 'true';
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (!['admin', 'agency', 'scanner'].includes(role || '') && !scannerEnabled) {
+      window.location.replace('/intranet');
+    }
+  }
+</script>
+
+<Layout title="Escáner QR — BJourneyGo Intranet">
+  <main class="scanner-page container">
+    <section class="scanner-head">
+      <a href="/intranet" class="back-link">← Volver a Intranet</a>
+      <h1>Escáner de Billetes QR</h1>
+      <p>Valida billetes en embarque y muestra al instante los datos del viajero y su ruta.</p>
+    </section>
+
+    <section class="scanner-card">
+      <div class="scanner-setup" id="scannerSetup">
+        <h2>Sesión de escaneo</h2>
+        <p>Selecciona un viaje de tu agencia antes de validar QR.</p>
+
+        <div id="adminOperatorConfig" class="admin-operator-config" hidden>
+          <label for="operatorSelect">Operador QR (solo admin)</label>
+          <select id="operatorSelect">
+            <option value="">Este usuario (sesión personal)</option>
+          </select>
+          <small>Si seleccionas un operador, la sesión activa se configurará para ese usuario y la verá en su app móvil.</small>
+        </div>
+
+        <label for="tripSelect">Viaje activo</label>
+        <select id="tripSelect">
+          <option value="">Selecciona un viaje…</option>
+        </select>
+
+        <label for="accessCode">Código de acceso (opcional)</label>
+        <input id="accessCode" type="text" maxlength="16" placeholder="Ej: AB29XZ" />
+
+        <div class="scanner-actions">
+          <button id="activateSessionBtn" type="button" class="btn btn--primary">Activar sesión</button>
+          <button id="refreshTripsBtn" type="button" class="btn btn--ghost">Actualizar viajes</button>
+        </div>
+
+        <div id="activeSessionInfo" class="active-session"></div>
+      </div>
+
+      <form id="scannerForm" class="scanner-form" novalidate>
+        <label for="qrPayload">Contenido QR</label>
+        <textarea id="qrPayload" placeholder="Escanea o pega aquí el contenido del QR" required></textarea>
+
+        <label for="presentedId">Documento presentado (DNI/ID, opcional)</label>
+        <input id="presentedId" type="text" placeholder="Ej: 41585496R" />
+
+        <div class="scanner-actions">
+          <button id="scanBtn" type="submit" class="btn btn--primary">Validar Billete</button>
+          <button id="clearBtn" type="button" class="btn btn--ghost">Limpiar</button>
+        </div>
+      </form>
+
+      <div id="scannerMessage" class="scanner-message" role="status" aria-live="polite"></div>
+
+      <div class="trip-passengers" id="tripPassengers">
+        <h3>Pasajeros del viaje activo</h3>
+        <div id="tripPassengersList" class="trip-passengers-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="scanResultModal" class="scan-modal" hidden>
+    <div class="scan-modal__content" role="dialog" aria-modal="true" aria-labelledby="scanResultTitle">
+      <div class="scan-modal__header">
+        <h2 id="scanResultTitle">Billete validado</h2>
+        <button id="closeScanModal" type="button" class="scan-modal__close">×</button>
+      </div>
+
+      <div id="scanResultBody" class="scan-modal__body"></div>
+
+      <div class="scan-modal__footer">
+        <button id="closeScanModalBtn" type="button" class="btn btn--primary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/scripts/intranet-escaner-qr.js"></script>
+</Layout>

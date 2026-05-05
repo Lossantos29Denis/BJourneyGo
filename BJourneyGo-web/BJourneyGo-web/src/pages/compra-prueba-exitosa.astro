@@ -1,0 +1,355 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/checkout.css';
+---
+
+<Layout title="Compra de prueba confirmada — BJourneyGo">
+  <main class="checkout-page test-page">
+    <div class="test-wrapper">
+      <section class="checkout-card test-card">
+        <div class="test-badge">🧪 COMPRA DE PRUEBA</div>
+        <h1>✅ Compra confirmada</h1>
+        <p class="test-subtitle">Pedido creado directamente (sin Stripe). Usa los datos abajo para probar el check-in.</p>
+
+        <div id="purchaseContent">
+          <p class="loading-msg">Cargando datos de la compra…</p>
+        </div>
+
+        <div class="checkout-actions" id="purchaseActions" style="display:none">
+          <a id="checkinLink" href="/mis-viajes" class="btn btn--primary">Ver mis viajes →</a>
+          <a href="/comprar" class="btn btn--ghost">Nueva compra</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <style>
+    .test-page {
+      min-height: 80vh;
+      align-items: flex-start;
+      padding-top: 2rem;
+    }
+    .test-wrapper {
+      width: 100%;
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem;
+    }
+    .test-card {
+      max-width: 100%;
+      text-align: left;
+    }
+    .test-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid #fde68a;
+      margin-bottom: 0.75rem;
+    }
+    .test-card h1 { text-align: left; font-size: 1.55rem; margin-bottom: 0.25rem; }
+    .test-subtitle { color: #6b7280; margin-bottom: 1.5rem; font-size: 0.93rem; }
+    .loading-msg { color: #9ca3af; }
+    .error-msg { color: #dc2626; }
+
+    /* info blocks */
+    .info-block {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .info-block h3 {
+      margin: 0 0 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #0369a1;
+    }
+    .ref-block {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+    .ref-block h3 { color: #1d4ed8; }
+    .ref-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .ref-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      font-family: monospace;
+      letter-spacing: 0.06em;
+      color: #1d4ed8;
+    }
+    .ref-hint {
+      font-size: 0.82rem;
+      color: #374151;
+      margin: 0.5rem 0 0.4rem;
+      line-height: 1.45;
+    }
+    .copy-btn {
+      background: #e0f2fe;
+      border: 1px solid #7dd3fc;
+      color: #0369a1;
+      border-radius: 8px;
+      padding: 0.22rem 0.7rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #bae6fd; }
+    .info-row {
+      display: flex;
+      gap: 0.55rem;
+      font-size: 0.88rem;
+      margin-top: 0.35rem;
+      color: #374151;
+      align-items: baseline;
+    }
+    .info-row .lbl { color: #6b7280; min-width: 90px; white-space: nowrap; }
+    .info-row .lbl::after { content: ':'; }
+
+    /* tickets */
+    .tickets-section h2 {
+      font-size: 1rem;
+      color: #1c3f7a;
+      margin: 0 0 0.65rem;
+    }
+    .ticket-card {
+      display: flex;
+      gap: 1.1rem;
+      align-items: flex-start;
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .ticket-info { flex: 1; }
+    .ticket-info h4 { margin: 0 0 0.4rem; font-size: 0.92rem; color: #1c3f7a; }
+    .ticket-info p { margin: 0.18rem 0; font-size: 0.84rem; color: #374151; }
+    .ticket-info p { display: flex; gap: 0.4rem; align-items: baseline; }
+    .ticket-info p .lbl { color: #9ca3af; white-space: nowrap; min-width: 68px; }
+    .ticket-info p .lbl::after { content: ':'; }
+    .ticket-qr img {
+      display: block;
+      width: 130px;
+      height: 130px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .ticket-qr .no-qr {
+      width: 130px;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 520px) {
+      .ticket-card { flex-direction: column; }
+      .ticket-qr img, .ticket-qr .no-qr { width: 100%; height: auto; aspect-ratio: 1; }
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1d4ed8;
+      border-radius: 8px;
+      padding: 0.32rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .download-btn:hover { background: #dbeafe; }
+  </style>
+
+  <script type="module">
+    (function () {
+      function esc(v) {
+        return String(v ?? '')
+          .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;')
+      }
+
+      function parseLocalDateTime(value) {
+        if (!value || typeof value !== 'string') return new Date(NaN)
+        const m = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/)
+        if (m) {
+          const [, y, mo, d, h, mi, s] = m
+          return new Date(
+            parseInt(y, 10),
+            parseInt(mo, 10) - 1,
+            parseInt(d, 10),
+            parseInt(h, 10),
+            parseInt(mi, 10),
+            parseInt(s || '0', 10)
+          )
+        }
+        return new Date(value)
+      }
+
+      function fmtDate(v) {
+        if (!v) return '-'
+        const d = parseLocalDateTime(v)
+        if (Number.isNaN(d.getTime())) return String(v)
+        return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+          + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+      }
+
+      function qrUrl(token) {
+        return `https://quickchart.io/qr?size=200&text=${encodeURIComponent(String(token || ''))}`
+      }
+
+      const contentEl = document.getElementById('purchaseContent')
+      const actionsEl = document.getElementById('purchaseActions')
+      const checkinLink = document.getElementById('checkinLink')
+
+      const raw = sessionStorage.getItem('testPurchaseResult')
+
+      if (!raw) {
+        contentEl.innerHTML = '<p class="error-msg">No se encontraron datos de compra. <a href="/comprar">Vuelve a buscar un viaje</a>.</p>'
+        return
+      }
+
+      let data
+      try {
+        data = JSON.parse(raw)
+      } catch (e) {
+        contentEl.innerHTML = '<p class="error-msg">Error al leer los datos de la compra.</p>'
+        return
+      }
+
+      sessionStorage.removeItem('testPurchaseResult')
+
+      const trip = data.trip || {}
+      const tickets = Array.isArray(data.tickets) ? data.tickets : []
+
+      function printTicket(t, idx) {
+        const name = t.passengerName || `Billete ${idx + 1}`
+        const w = window.open('', '_blank', 'width=520,height=760')
+        if (!w) return
+        const rows = [
+          t.passengerIdentification ? `<tr><td>DNI / ID</td><td>${esc(t.passengerIdentification)}</td></tr>` : '',
+          trip.routeCode ? `<tr><td>Código ruta</td><td>${esc(trip.routeCode)}</td></tr>` : '',
+          trip.departureAt ? `<tr><td>Salida</td><td>${esc(fmtDate(trip.departureAt))}</td></tr>` : '',
+          trip.arrivalAt ? `<tr><td>Llegada</td><td>${esc(fmtDate(trip.arrivalAt))}</td></tr>` : '',
+          `<tr><td>Referencia</td><td><strong>${esc(data.referenceCode || '')}</strong></td></tr>`,
+          `<tr><td>Estado</td><td>✅ PAGADO</td></tr>`
+        ].filter(Boolean).join('')
+        const qrHtml = t.qrToken
+          ? `<div class="qr-wrap"><img id="qrImg" src="${qrUrl(t.qrToken)}" alt="QR" width="220" height="220"></div>`
+          : ''
+        w.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>${esc(name)} — BJourneyGo</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;color:#111;padding:2rem 2.5rem;max-width:480px}.brand{font-weight:800;font-size:1.1rem;color:#1d4ed8}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1d4ed8;padding-bottom:.6rem;margin-bottom:1rem}.sublbl{font-size:.7rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.15rem}.passenger{font-size:1.4rem;font-weight:700}.route{font-size:.98rem;color:#374151;margin:.2rem 0 1rem}table{width:100%;border-collapse:collapse;font-size:.87rem;margin-bottom:1rem}td{padding:.28rem 0;border-bottom:1px solid #f3f4f6;vertical-align:top}td:first-child{color:#6b7280;width:130px}.qr-wrap{text-align:center;margin:.75rem 0 1rem}.qr-wrap img{border:1px solid #e5e7eb;border-radius:8px}.footer{text-align:center;font-size:.74rem;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:.6rem}@media print{body{padding:1rem}}</style>
+</head>
+<body>
+<div class="header"><span class="brand">BJourneyGo</span><span style="font-size:.75rem;color:#9ca3af">Billete ${idx + 1} / ${tickets.length}</span></div>
+<span class="sublbl">Pasajero</span>
+<div class="passenger">${esc(name)}</div>
+<div class="route">${esc(trip.origin || '')} → ${esc(trip.destination || '')}</div>
+<table>${rows}</table>
+${qrHtml}
+<div class="footer">Presenta este billete al conductor · BJourneyGo</div>
+</body></html>`)
+        w.document.close()
+        const img = w.document.getElementById('qrImg')
+        if (img) {
+          img.onload = () => { w.focus(); w.print() }
+          img.onerror = () => { w.focus(); w.print() }
+        } else {
+          setTimeout(() => { w.focus(); w.print() }, 400)
+        }
+      }
+
+      contentEl.innerHTML = `
+        <div class="info-block ref-block">
+          <h3>Tu código de referencia</h3>
+          <div class="ref-row">
+            <span class="ref-value" id="refVal">${esc(data.referenceCode)}</span>
+            <button class="copy-btn" id="copyBtn">Copiar</button>
+          </div>
+          <p class="ref-hint">Guarda este código junto con tu correo. Los necesitarás para acceder a tus billetes en <strong>Mis Viajes</strong>.</p>
+          <div class="info-row"><span class="lbl">Estado</span><strong>PAGADO ✅</strong></div>
+          <div class="info-row"><span class="lbl">Total</span><strong>${esc(String(data.total))} ${esc(data.currency || 'EUR')}</strong></div>
+          <div class="info-row"><span class="lbl">Pedido</span><strong>#${esc(String(data.orderId))}</strong></div>
+        </div>
+
+        <div class="info-block">
+          <h3>Contacto (para identificarte en Mis Viajes)</h3>
+          <div class="info-row"><span class="lbl">Email</span><strong>${esc(data.contactEmail)}</strong></div>
+          ${data.contactPhone ? `<div class="info-row"><span class="lbl">Teléfono</span><strong>${esc(data.contactPhone)}</strong></div>` : ''}
+        </div>
+
+        <div class="info-block">
+          <h3>Viaje</h3>
+          <div class="info-row"><span class="lbl">Ruta</span><strong>${esc(trip.origin)} → ${esc(trip.destination)}</strong></div>
+          ${trip.routeCode ? `<div class="info-row"><span class="lbl">Código</span><strong>${esc(trip.routeCode)}</strong></div>` : ''}
+          ${trip.departureAt ? `<div class="info-row"><span class="lbl">Salida</span><strong>${esc(fmtDate(trip.departureAt))}</strong></div>` : ''}
+          ${trip.arrivalAt ? `<div class="info-row"><span class="lbl">Llegada</span><strong>${esc(fmtDate(trip.arrivalAt))}</strong></div>` : ''}
+        </div>
+
+        <div class="tickets-section">
+          <h2>Billetes (${tickets.length})</h2>
+          ${tickets.map((t, i) => {
+            const name = t.passengerName || `Billete ${i + 1}`
+            return `
+            <div class="ticket-card">
+              <div class="ticket-info">
+                <h4>${esc(name)}</h4>
+                ${t.passengerIdentification ? `<p><span class="lbl">ID</span>${esc(t.passengerIdentification)}</p>` : ''}
+                <button class="download-btn" data-print-idx="${i}" type="button">⬇ Descargar billete</button>
+              </div>
+              <div class="ticket-qr">
+                ${t.qrToken
+                  ? `<img src="${qrUrl(t.qrToken)}" alt="QR de ${esc(name)}" loading="lazy" />`
+                  : '<div class="no-qr">Sin QR</div>'}
+              </div>
+            </div>
+          `}).join('')}
+        </div>
+      `
+
+      document.getElementById('copyBtn')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(data.referenceCode || '').then(() => {
+          const btn = document.getElementById('copyBtn')
+          if (btn) { btn.textContent = '¡Copiado!'; setTimeout(() => { btn.textContent = 'Copiar' }, 2000) }
+        })
+      })
+
+      contentEl.addEventListener('click', e => {
+        const btn = e.target.closest('[data-print-idx]')
+        if (!btn) return
+        printTicket(tickets[Number(btn.dataset.printIdx)], Number(btn.dataset.printIdx))
+      })
+
+      if (data.referenceCode && data.contactEmail && checkinLink) {
+        const p = new URLSearchParams({ ref: data.referenceCode, email: data.contactEmail })
+        checkinLink.href = `/mis-viajes?${p.toString()}`
+      }
+
+      actionsEl.style.display = 'flex'
+    })()
+  </script>
+</Layout>

@@ -1,0 +1,207 @@
+---
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin — BJourneyGo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #0066cc;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    section {
+      margin-top: 1.25rem;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 14px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    section h3 {
+      color: #333;
+      margin-top: 0;
+    }
+
+    #sessionInfo {
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn--ghost {
+      background: transparent;
+      border: 1px solid #0066cc;
+      color: #0066cc;
+    }
+
+    .btn--ghost:hover {
+      background: #0066cc;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      section {
+        padding: 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.35rem;
+      }
+      section {
+        padding: 1rem;
+      }
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem">
+    <div id="admin-root" style="max-width:900px;margin:0 auto;">
+      <h1 style="color:var(--accent-1);font-size:2rem;margin-bottom:.5rem">Panel de administración</h1>
+      <p style="color:var(--text-muted);margin-bottom:1.5rem">Área restringida. Solo accesible para administradores.</p>
+
+      <section style="margin-top:1.25rem;background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow)">
+        <h3 style="color:var(--text);margin-top:0">Información de sesión</h3>
+        <p id="sessionInfo" style="color:var(--text-muted);margin-bottom:1rem">Cargando...</p>
+        <button id="logoutBtn" class="btn btn--ghost">Cerrar sesión</button>
+      </section>
+
+      <section style="margin-top:1.25rem;background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow)">
+        <h3 style="color:var(--text);margin-top:0">Verificaciones de correo</h3>
+        <p style="color:var(--text-muted);margin-bottom:1rem">Últimas verificaciones registradas.</p>
+        <div style="overflow:auto">
+          <table style="width:100%;border-collapse:collapse;min-width:560px">
+            <thead>
+              <tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:0.5rem">Email</th>
+                <th style="padding:0.5rem">Fecha</th>
+                <th style="padding:0.5rem">IP</th>
+                <th style="padding:0.5rem">User Agent</th>
+              </tr>
+            </thead>
+            <tbody id="verificationLogsBody">
+              <tr><td colspan="4" style="padding:0.75rem;color:var(--text-muted)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <style>
+    @media (max-width:768px){
+      #admin-root{padding:0 1rem}
+    }
+
+    @media (max-width:620px){
+      h1{font-size:1.5rem!important}
+      section{padding:1.25rem!important}
+    }
+
+    @media (max-width:480px){
+      h1{font-size:1.35rem!important}
+      section{padding:1rem!important}
+      p{font-size:0.9rem!important}
+    }
+  </style>
+
+  <script type="module">
+    // Protect admin page client-side: check isAdmin flag
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    if (!isAdmin) {
+      // redirect to login
+      location.replace('/login');
+    } else {
+      const user = localStorage.getItem('user') || 'admin';
+      document.getElementById('sessionInfo').textContent = `Conectado como: ${user} (administrador)`;
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('auth');
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('user');
+      location.replace('/');
+    });
+
+    async function loadVerificationLogs() {
+      const tbody = document.getElementById('verificationLogsBody');
+      if (!tbody) return;
+      try {
+        const token = localStorage.getItem('bjourney_token');
+        const res = await fetch('/api/admin/email-verifications?limit=50&offset=0', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          tbody.innerHTML = `<tr><td colspan="4" style="padding:0.75rem;color:var(--text-muted)">No autorizado</td></tr>`;
+          return;
+        }
+        const logs = data.logs || [];
+        if (!logs.length) {
+          tbody.innerHTML = `<tr><td colspan="4" style="padding:0.75rem;color:var(--text-muted)">Sin registros</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = logs.map((log) => `
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:0.5rem">${log.email || '-'}</td>
+            <td style="padding:0.5rem">${new Date(log.verifiedAt || log.createdAt).toLocaleString()}</td>
+            <td style="padding:0.5rem">${log.ipAddress || '-'}</td>
+            <td style="padding:0.5rem;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${log.userAgent || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:0.75rem;color:var(--text-muted)">Error al cargar</td></tr>`;
+      }
+    }
+
+    loadVerificationLogs();
+  </script>
+</body>
+</html>

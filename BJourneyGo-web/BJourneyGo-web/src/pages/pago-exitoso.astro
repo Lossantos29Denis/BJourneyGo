@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/checkout.css';
+---
+
+<Layout title="Pago exitoso — BJourneyGo">
+  <main class="checkout-page test-page">
+    <section class="checkout-card test-card">
+      <h1>Pago confirmado</h1>
+      <p id="statusText">Estamos validando el pago...</p>
+      <div id="purchaseContent"></div>
+      <div class="checkout-actions">
+        <a href="/mis-viajes" class="btn btn--primary">Ver mis viajes</a>
+        <a id="openAppLink" class="btn btn--ghost" href="#">Volver a la app</a>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .test-page { min-height: 80vh; align-items: flex-start; padding-top: 2rem; }
+    .test-card { max-width: 740px; width: 100%; text-align: left; margin: 0 auto; }
+    .info-block { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 0.9rem 1.1rem; margin: 1rem 0; }
+    .info-block h3 { margin: 0 0 0.4rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: #0369a1; }
+    .info-row { display: flex; gap: 0.55rem; font-size: 0.88rem; margin-top: 0.35rem; color: #374151; align-items: baseline; }
+    .info-row .lbl { color: #6b7280; min-width: 90px; white-space: nowrap; }
+    .info-row .lbl::after { content: ':'; }
+    .tickets-section h2 { font-size: 1rem; color: #1c3f7a; margin: 0.5rem 0 0.65rem; }
+    .ticket-card { display: flex; gap: 1.1rem; align-items: flex-start; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 0.9rem 1rem; margin-bottom: 0.75rem; }
+    .ticket-info { flex: 1; }
+    .ticket-info h4 { margin: 0 0 0.4rem; font-size: 0.92rem; color: #1c3f7a; }
+    .ticket-qr img { display: block; width: 130px; height: 130px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .ticket-qr .no-qr { width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 8px; font-size: 0.78rem; color: #9ca3af; }
+    .download-btn { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.75rem; background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; border-radius: 8px; padding: 0.32rem 0.9rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    @media (max-width: 520px) {
+      .ticket-card { flex-direction: column; }
+      .ticket-qr img, .ticket-qr .no-qr { width: 100%; height: auto; aspect-ratio: 1; }
+    }
+  </style>
+
+  <script type="module" src="/src/scripts/pago-exitoso.js"></script>
+</Layout>

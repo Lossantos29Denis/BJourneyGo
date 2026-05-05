@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/mis-viajes.css';
+---
+
+<Layout title="Mis Viajes — BJourneyGo">
+  <main class="mis-viajes-page container">
+    <section class="mis-viajes-card">
+      <h1>Mis Viajes</h1>
+
+      <!-- LOGGED-IN: list of user's own orders (populated by JS) -->
+      <section id="myOrdersSection" style="display:none">
+        <div id="myOrdersContent" class="my-orders-loading">Cargando tus viajes…</div>
+      </section>
+
+      <!-- DIVIDER shown only when user is logged in -->
+      <div id="lookupDivider" class="lookup-divider" style="display:none">
+        <span>Buscar por código de referencia</span>
+      </div>
+
+      <!-- GUEST / secondary lookup form -->
+      <div id="lookupSection">
+        <p class="mis-viajes-subtitle" id="lookupSubtitle">Introduce tu correo (o teléfono) y el código de referencia que recibiste para consultar tus billetes y QR de embarque.</p>
+
+        <form id="checkinLookupForm" class="lookup-form" novalidate>
+          <label>
+            Correo o teléfono
+            <input id="identifier" name="identifier" type="text" placeholder="correo@ejemplo.com o +34 600 000 000" required />
+          </label>
+          <label>
+            Código de referencia
+            <input id="referenceCode" name="referenceCode" type="text" placeholder="BJ-XXXXXXXX" required style="text-transform:uppercase" />
+          </label>
+          <button type="submit" class="btn btn--primary" id="lookupBtn">Ver mis viajes</button>
+        </form>
+
+        <div id="checkinMessage" class="lookup-message" role="status" aria-live="polite"></div>
+
+        <section id="reservationPanel" class="reservation-panel is-hidden" aria-live="polite">
+          <div class="reservation-head">
+            <h2>Tu reserva</h2>
+            <div id="reservationMeta" class="reservation-meta"></div>
+          </div>
+
+          <form id="contactUpdateForm" class="contact-form" novalidate>
+            <h3>Actualizar datos de contacto</h3>
+            <div class="contact-grid">
+              <label>
+                Nuevo correo
+                <input id="contactEmail" name="contactEmail" type="email" placeholder="correo@ejemplo.com" />
+              </label>
+              <label>
+                Nuevo teléfono
+                <input id="contactPhone" name="contactPhone" type="tel" placeholder="+34 600 000 000" />
+              </label>
+            </div>
+            <button type="submit" class="btn btn--ghost" id="updateContactBtn">Guardar contacto</button>
+          </form>
+
+          <div id="ticketsList" class="tickets-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/mis-viajes.js"></script>
+</Layout>
+

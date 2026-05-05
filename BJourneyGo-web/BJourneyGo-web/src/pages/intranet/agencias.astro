@@ -1,0 +1,152 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/gestion-agencias.css';
+---
+
+<script is:inline>
+  if (typeof window !== 'undefined') {
+    const intranetAuth = localStorage.getItem('intranetAuth');
+    const role = localStorage.getItem('intranetRole');
+    if (intranetAuth !== 'true') {
+      window.location.replace('/intranet-login');
+    } else if (role === 'agency' || role === 'scanner') {
+      window.location.replace('/intranet');
+    }
+  }
+</script>
+
+<Layout title="Gestion de Agencias — BJourneyGo">
+  <div class="page-wrapper">
+    <main class="container page-content">
+      <section class="page-hero">
+        <div class="breadcrumb">
+          <a href="/intranet">← Volver a Intranet</a>
+        </div>
+        <h1>Gestion de Agencias</h1>
+        <p class="lead">Crea, edita y administra agencias de viajes registradas en la plataforma.</p>
+      </section>
+
+      <div class="actions-bar">
+        <button id="btnNewAgency" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Nueva Agencia</span>
+        </button>
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar agencias...">
+        </div>
+      </div>
+
+      <div class="agencies-table-container">
+        <table class="agencies-table">
+          <thead>
+            <tr>
+              <th>Agencia</th>
+              <th>Email</th>
+              <th>Telefono</th>
+              <th>Stripe</th>
+              <th>Comision %</th>
+              <th>Payout</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="agenciesTableBody">
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Cargando agencias...</td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <p>No hay agencias registradas</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="agencyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nueva Agencia</h2>
+        <button class="modal-close" id="closeModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="agencyForm" class="modal-body">
+        <input type="hidden" id="agencyId">
+        <div class="form-group">
+          <label for="agencyName">Nombre *</label>
+          <input type="text" id="agencyName" required placeholder="Ej: Viajes Norte">
+        </div>
+        <div class="form-group">
+          <label for="agencyEmail">Email</label>
+          <input type="email" id="agencyEmail" placeholder="contacto@agencia.com">
+        </div>
+        <div class="form-group">
+          <label for="agencyPhone">Telefono</label>
+          <input type="tel" id="agencyPhone" placeholder="+34 612 345 678">
+        </div>
+        <div class="form-group">
+          <label for="agencyTaxId">CIF / Tax ID</label>
+          <input type="text" id="agencyTaxId" placeholder="B12345678">
+        </div>
+        <div class="form-group">
+          <label for="agencyStripe">Stripe Account ID</label>
+          <input type="text" id="agencyStripe" placeholder="acct_1234">
+        </div>
+        <div class="form-group">
+          <label for="agencyCommission">Comision (%)</label>
+          <input type="number" id="agencyCommission" placeholder="10" min="0" max="100" step="0.1">
+        </div>
+        <div class="form-group">
+          <label for="agencyPayout">Payout activo</label>
+          <select id="agencyPayout">
+            <option value="true">Si</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="agencyStatus">Estado</label>
+          <select id="agencyStatus">
+            <option value="ACTIVE">Activa</option>
+            <option value="INACTIVE">Inactiva</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label for="agencyAddress">Direccion</label>
+          <textarea id="agencyAddress" placeholder="Calle Principal 123, Madrid"></textarea>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+        <button type="submit" form="agencyForm" class="btn btn-primary" id="saveBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteModal" class="modal">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <h2>Confirmar eliminacion</h2>
+      </div>
+      <div class="modal-body" style="grid-template-columns:1fr;">
+        <p>¿Estas seguro de que deseas eliminar esta agencia?</p>
+        <p><strong id="deleteAgencyName"></strong></p>
+        <p class="warning">Esta accion no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/scripts/gestion-agencias.js"></script>
+</Layout>
