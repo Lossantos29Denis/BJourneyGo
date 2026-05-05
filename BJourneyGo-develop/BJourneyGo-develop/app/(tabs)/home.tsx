@@ -1,3 +1,6 @@
+import { createStripeCheckoutSession, getTrips } from '@/lib/api'
+import { createURL } from 'expo-linking'
+import * as WebBrowser from 'expo-web-browser'
 import React from 'react'
 import {
   ActivityIndicator,
@@ -5,6 +8,7 @@ import {
   Image,
   Linking,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -13,7 +17,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { createStripeCheckoutSession, getTrips } from '@/lib/api'
 
 type BookingType = 'ONEWAY' | 'ROUNDTRIP'
 type Leg = 'outbound' | 'return'
@@ -316,6 +319,8 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
         passengers: parsed,
         contactEmail: String(parsed[0]?.email || ''),
         contactPhone: String(parsed[0]?.phone || ''),
+        successUrl: createURL('/payment/result?status=success'),
+        cancelUrl: createURL('/payment/result?status=cancelled'),
       }
 
       if (bookingType === 'ROUNDTRIP') {
@@ -328,9 +333,15 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
       const checkout = await createStripeCheckoutSession(payload)
       const url = String(checkout?.url || '')
       if (!url) throw new Error('No se recibio URL de pago')
-      const canOpen = await Linking.canOpenURL(url)
-      if (!canOpen) throw new Error('No se pudo abrir la pasarela de pago')
-      await Linking.openURL(url)
+      if (Platform.OS === 'web') {
+        const canOpen = await Linking.canOpenURL(url)
+        if (!canOpen) throw new Error('No se pudo abrir la pasarela de pago')
+        await Linking.openURL(url)
+      } else {
+        const redirectUrl = createURL('/payment/result')
+        const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl)
+        if (result.type === 'cancel') return
+      }
       onClose()
     } catch (e: any) {
       Alert.alert('Pago', e?.message || 'No se pudo iniciar el pago.')

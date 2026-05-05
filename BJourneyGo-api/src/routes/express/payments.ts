@@ -1,12 +1,12 @@
-import { Router } from 'express'
-import { transaction, query } from '../../lib/db'
-import mailer from '../../lib/mailer'
-import { buildReceiptEmail } from '../../lib/emailTemplates'
 import crypto from 'crypto'
+import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import PDFDocument from 'pdfkit'
 import streamBuffers from 'stream-buffers'
 import Stripe from 'stripe'
+import { query, transaction } from '../../lib/db'
+import { buildReceiptEmail } from '../../lib/emailTemplates'
+import mailer from '../../lib/mailer'
 
 const JWT_SECRET_PAYMENTS = process.env.JWT_SECRET || 'change-this-secret-to-a-strong-value'
 
@@ -39,6 +39,17 @@ type PassengerInput = {
   phone?: string | null
   email?: string | null
   isContact?: boolean
+}
+
+function resolveCheckoutReturnUrl(candidate: any, fallback: string): string {
+  const value = String(candidate || '').trim()
+  if (/^(bjourneygo|exp|exps):\/\//i.test(value)) return value
+  return fallback
+}
+
+function appendCheckoutSessionId(baseUrl: string): string {
+  const separator = baseUrl.includes('?') ? '&' : '?'
+  return `${baseUrl}${separator}session_id={CHECKOUT_SESSION_ID}`
 }
 
 function generateReferenceCode(length = 10): string {
@@ -345,11 +356,14 @@ router.post('/reconcile', async (req: any, res) => {
 })
 
 router.post('/stripe/checkout', async (req: any, res) => {
-  const { quantity = 1, passengers: rawPassengers = [], contactEmail: rawContactEmail = '' } = req.body || {}
+  const { quantity = 1, passengers: rawPassengers = [], contactEmail: rawContactEmail = '', successUrl: rawSuccessUrl = '', cancelUrl: rawCancelUrl = '' } = req.body || {}
   const qty = Number(quantity)
   if (!stripe) return res.status(500).json({ error: 'stripe not configured' })
   if (!STRIPE_SUCCESS_URL || !STRIPE_CANCEL_URL) return res.status(500).json({ error: 'stripe urls not configured' })
   if (!Number.isInteger(qty) || qty <= 0) return res.status(400).json({ error: 'positive integer quantity required' })
+
+  const successUrl = resolveCheckoutReturnUrl(rawSuccessUrl, STRIPE_SUCCESS_URL)
+  const cancelUrl = resolveCheckoutReturnUrl(rawCancelUrl, STRIPE_CANCEL_URL)
 
   const userId = extractOptionalUserId(req)
 
@@ -455,8 +469,8 @@ router.post('/stripe/checkout', async (req: any, res) => {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: lineItems,
-      success_url: `${STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${STRIPE_CANCEL_URL}?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: appendCheckoutSessionId(successUrl),
+      cancel_url: appendCheckoutSessionId(cancelUrl),
       ...(hasDestination ? {
         payment_intent_data: {
           application_fee_amount: feeCents,

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Platform } from 'react-native'
 import Constants from 'expo-constants'
+import { Platform } from 'react-native'
 
 // Resolve API URL from multiple config sources (Expo extras, env, fallback).
 let API_URL = (Constants.expoConfig as any)?.extra?.API_URL || process.env.API_URL || 'http://localhost:4000'
@@ -209,6 +209,8 @@ type CheckoutPayload = {
   passengers?: CheckoutPassenger[]
   contactEmail?: string
   contactPhone?: string
+  successUrl?: string
+  cancelUrl?: string
 }
 
 export async function createStripeCheckoutSession(
@@ -225,6 +227,8 @@ export async function createStripeCheckoutSession(
         passengers: Array.isArray(tripOrPayload.passengers) ? tripOrPayload.passengers : [],
         contactEmail: String(tripOrPayload.contactEmail || '').trim().toLowerCase(),
         contactPhone: tripOrPayload.contactPhone || undefined,
+        successUrl: String(tripOrPayload.successUrl || '').trim() || undefined,
+        cancelUrl: String(tripOrPayload.cancelUrl || '').trim() || undefined,
       }
 
   const res = await fetchWithAuth('/payments/stripe/checkout', {
@@ -234,6 +238,17 @@ export async function createStripeCheckoutSession(
   })
   const json = await res.json()
   if (!res.ok) throw new Error(json.error || 'checkout failed')
+  return json
+}
+
+export async function confirmStripePayment(sessionId: string) {
+  const res = await fetchWithAuth('/payments/stripe/confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(json.error || 'payment confirmation failed')
   return json
 }
 

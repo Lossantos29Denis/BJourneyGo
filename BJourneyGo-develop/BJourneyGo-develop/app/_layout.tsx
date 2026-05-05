@@ -10,9 +10,11 @@ import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { Splash } from '@/components/splash';
-import { AuthProvider } from '@/contexts/auth-context';
+import { AuthProvider, useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/contexts/auth-context';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 
 // Keep the native splash screen visible while we load resources
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -211,6 +213,7 @@ function RootNavigator() {
       <Stack.Screen name="sign_up" />
       <Stack.Screen name="terms_conditions" />
       <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="payment/result" />
       <Stack.Screen name="trip/[ticketUuid]" />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
     </Stack>
