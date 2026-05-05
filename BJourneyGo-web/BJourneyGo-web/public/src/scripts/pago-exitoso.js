@@ -2,12 +2,34 @@ const statusText = document.getElementById('statusText')
 const openAppLink = document.getElementById('openAppLink')
 const purchaseContent = document.getElementById('purchaseContent')
 let lastPurchaseMeta = null
+let appLinkTimeout = null
+let appLinkTarget = ''
+
+function setAppLinkTarget(url) {
+  appLinkTarget = String(url || '').trim()
+  if (openAppLink) {
+    openAppLink.href = appLinkTarget || '#'
+  }
+}
+
+function launchApp() {
+  if (!appLinkTarget) return false
+  window.location.href = appLinkTarget
+  return true
+}
 
 const params = new URLSearchParams(window.location.search)
 const sessionId = params.get('session_id')
 
 if (openAppLink && sessionId) {
-  openAppLink.href = `bjourneygo://payment/result?status=success&session_id=${encodeURIComponent(sessionId)}`
+  setAppLinkTarget(`bjourneygo://payment/result?status=success&session_id=${encodeURIComponent(sessionId)}`)
+}
+
+if (openAppLink) {
+  openAppLink.addEventListener('click', (event) => {
+    event.preventDefault()
+    launchApp()
+  })
 }
 
 async function confirm() {
@@ -39,7 +61,11 @@ async function confirm() {
         ref: String(purchase.referenceCode || ''),
         email: String(purchase.contactEmail || '')
       })
-      openAppLink.href = `bjourneygo://payment/result?${appParams.toString()}`
+      setAppLinkTarget(`bjourneygo://payment/result?${appParams.toString()}`)
+      if (appLinkTimeout) clearTimeout(appLinkTimeout)
+      appLinkTimeout = setTimeout(() => {
+        if (appLinkTarget) launchApp()
+      }, 600)
     }
 
     const esc = (v) => String(v ?? '')
