@@ -270,6 +270,16 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
     setPassengers((current) => current.map((p, i) => (i === index ? { ...p, ...patch } : p)))
   }, [])
 
+  React.useEffect(() => {
+    setPassengers((current) => {
+      if (current.length === quantity) return current
+      if (current.length < quantity) {
+        return [...current, ...buildPassengers(quantity - current.length)]
+      }
+      return current.slice(0, quantity)
+    })
+  }, [quantity])
+
   const loadReturnTrips = React.useCallback(async () => {
     if (bookingType !== 'ROUNDTRIP') return
     try {
