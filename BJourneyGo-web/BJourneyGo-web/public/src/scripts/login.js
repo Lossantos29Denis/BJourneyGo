@@ -34,6 +34,19 @@ form?.addEventListener('submit', async (e) => {
     localStorage.setItem('auth', 'true');
     localStorage.setItem('user', data.user);
     localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
+
+    // Also set intranet auth for admin/agency/scanner users so they can access gestion-billetes
+    const userRole = data.role || (data.isAdmin ? 'admin' : 'user');
+    if (data.isAdmin || userRole === 'agency' || userRole === 'scanner' || data.scannerEnabled) {
+      localStorage.setItem('intranetAuth', 'true');
+      localStorage.setItem('intranetUser', data.user);
+      localStorage.setItem('intranetRole', userRole);
+      localStorage.setItem('intranetIsAdmin', data.isAdmin ? 'true' : 'false');
+      localStorage.setItem('intranetScannerEnabled', data.scannerEnabled ? 'true' : 'false');
+      localStorage.setItem('agencyId', data.agencyId || '');
+      localStorage.setItem('agencyName', data.agencyName || '');
+    }
+
     location.replace('/');
   } catch (error) {
     alert('Error de conexión');

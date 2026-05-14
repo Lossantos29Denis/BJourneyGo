@@ -18,8 +18,16 @@ async function refresh() {
 }
 
 export async function fetchWithAuth(url, opts = {}) {
-  const token = getToken()
   const headers = opts.headers || {}
+  let token = getToken()
+  if (!token && getRefreshToken()) {
+    try {
+      await refresh()
+      token = getToken()
+    } catch (_error) {
+      clearAuth()
+    }
+  }
   if (token) headers['Authorization'] = `Bearer ${token}`
   opts.headers = headers
   let res = await fetch(url, opts)

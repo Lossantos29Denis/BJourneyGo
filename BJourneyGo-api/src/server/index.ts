@@ -40,6 +40,21 @@ app.use('/agency', agencyRouter)
 app.use('/admin/email-tokens', adminEmailTokensRouter)
 app.use('/admin', adminRouter)
 
+const apiRouter = express.Router()
+apiRouter.use('/auth', authRouter)
+apiRouter.use('/health', healthRouter)
+apiRouter.use('/', publicRouter)
+apiRouter.use('/orders', ordersRouter)
+apiRouter.use('/tickets', ticketsRouter)
+apiRouter.use('/tickets', qrRouter)
+apiRouter.use('/payments', paymentsRouter)
+apiRouter.use('/tickets', offlineVerifyRouter)
+apiRouter.use('/agency', agencyRouter)
+apiRouter.use('/admin/email-tokens', adminEmailTokensRouter)
+apiRouter.use('/admin', adminRouter)
+
+app.use('/api', apiRouter)
+
 const port = Number(process.env.PORT || 4000)
 
 async function start() {

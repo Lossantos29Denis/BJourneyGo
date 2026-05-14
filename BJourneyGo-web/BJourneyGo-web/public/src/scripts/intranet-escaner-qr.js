@@ -1,9 +1,17 @@
 import { fetchWithAuth } from '/src/scripts/api.js'
 
-const auth = localStorage.getItem('intranetAuth')
+let auth = localStorage.getItem('intranetAuth')
 const role = localStorage.getItem('intranetRole')
 const scannerEnabled = localStorage.getItem('intranetScannerEnabled') === 'true'
 const isAdmin = role === 'admin'
+const authFlag = localStorage.getItem('auth') === 'true'
+const isAdminFlag = localStorage.getItem('isAdmin') === 'true'
+if (auth !== 'true' && authFlag && isAdminFlag) {
+  localStorage.setItem('intranetAuth', 'true')
+  localStorage.setItem('intranetRole', 'admin')
+  localStorage.setItem('intranetIsAdmin', 'true')
+  auth = 'true'
+}
 if (auth !== 'true') location.replace('/intranet-login')
 if (!['admin', 'agency', 'scanner'].includes(role || '') && !scannerEnabled) location.replace('/intranet')
 

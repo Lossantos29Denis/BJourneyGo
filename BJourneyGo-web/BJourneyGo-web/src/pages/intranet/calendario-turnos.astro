@@ -6,7 +6,15 @@ import '../../styles/intranet-calendario-turnos.css';
 <script is:inline>
   // Verificar autenticación de intranet antes de renderizar
   if (typeof window !== 'undefined') {
-    const intranetAuth = localStorage.getItem('intranetAuth');
+    let intranetAuth = localStorage.getItem('intranetAuth');
+    const authFlag = localStorage.getItem('auth') === 'true';
+    const isAdminFlag = localStorage.getItem('isAdmin') === 'true';
+    if (intranetAuth !== 'true' && authFlag && isAdminFlag) {
+      localStorage.setItem('intranetAuth', 'true');
+      localStorage.setItem('intranetRole', 'admin');
+      localStorage.setItem('intranetIsAdmin', 'true');
+      intranetAuth = 'true';
+    }
     if (intranetAuth !== 'true') {
       window.location.replace('/intranet-login');
     }

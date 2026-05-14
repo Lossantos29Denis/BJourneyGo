@@ -3,8 +3,18 @@ import { fetchWithAuth } from '/src/scripts/api.js'
 // Gestion de Billetes - Integracion con API
 
 const intranetAuth = localStorage.getItem('intranetAuth')
+const authFlag = localStorage.getItem('auth') === 'true'
+const isAdminFlag = localStorage.getItem('isAdmin') === 'true'
+
 if (intranetAuth !== 'true') {
-  location.replace('/intranet-login')
+  // Fallback: si el usuario tiene auth pública con admin, conceder acceso
+  if (authFlag && isAdminFlag) {
+    localStorage.setItem('intranetAuth', 'true')
+    localStorage.setItem('intranetRole', 'admin')
+    localStorage.setItem('intranetIsAdmin', 'true')
+  } else {
+    location.replace('/intranet-login')
+  }
 }
 
 const role = localStorage.getItem('intranetRole') || 'admin'
@@ -114,6 +124,17 @@ async function fetchJson(url) {
   return res.json()
 }
 
+function showAuthError() {
+  const tbody = document.getElementById('routesTableBody')
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#ef4444">Error de autenticación. Tu sesión ha expirado. <a href="/intranet-login" style="color:var(--accent-1)">Inicia sesión nuevamente</a></td></tr>'
+  }
+  const tripsBody = document.getElementById('tripsTableBody')
+  if (tripsBody) {
+    tripsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:#ef4444">Error de autenticación. Tu sesión ha expirado.</td></tr>'
+  }
+}
+
 async function loadData() {
   try {
     const [routesRes, tripsRes] = await Promise.all([
@@ -125,6 +146,11 @@ async function loadData() {
   } catch (e) {
     apiRoutes = []
     apiTrips = []
+    // Check if it was an auth error (401)
+    if (e && e.message === 'request failed') {
+      showAuthError()
+      return
+    }
   }
 
   loadLocalRoutes()
