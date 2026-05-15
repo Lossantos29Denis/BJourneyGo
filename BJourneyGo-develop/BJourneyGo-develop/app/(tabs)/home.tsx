@@ -285,20 +285,25 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
     try {
       setLoadingReturn(true)
       setReturnSearchError('')
-      const tripDate = String(trip.departureAt || '').trim().slice(0, 10)
-      const searchDate = /^\d{4}-\d{2}-\d{2}$/.test(tripDate) ? tripDate : new Date().toISOString().slice(0, 10)
+      const outboundDepartureMs = parseLocalDateTime(trip.departureAt).getTime()
+
       const payload = await getTrips({
         origin: trip.destination || '',
         destination: trip.origin || '',
-        startDate: searchDate,
-        endDate: searchDate,
       })
       const trips = normalizeTrips(payload)
-      const filtered = trips.filter(t => Number(t.id) !== Number(trip.id))
+      const filtered = trips
+        .filter((t) => Number(t.id) !== Number(trip.id))
+        .filter((t) => {
+          if (Number.isNaN(outboundDepartureMs)) return true
+          const departureMs = parseLocalDateTime(t.departureAt).getTime()
+          return Number.isFinite(departureMs) && departureMs > outboundDepartureMs
+        })
+        .sort((a, b) => parseLocalDateTime(a.departureAt).getTime() - parseLocalDateTime(b.departureAt).getTime())
       setReturnResults(filtered)
       setSelectingLeg('return')
       if (filtered.length === 0) {
-        setReturnSearchError('No existen viajes de vuelta para esta ruta y fecha.')
+        setReturnSearchError('No existen viajes de vuelta posteriores a la ida para esta ruta.')
       }
     } catch (e: any) {
       setReturnResults([])
@@ -312,6 +317,10 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
   React.useEffect(() => {
     if (!visible) return
     if (bookingType === 'ROUNDTRIP') {
+      setSelectingLeg('return')
+      setReturnTrip(null)
+      setReturnResults([])
+      setReturnSearchError('Buscando viajes de vuelta más cercanos a la ida...')
       void loadReturnTrips()
       return
     }
@@ -457,6 +466,9 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
                 onPress={() => {
                   setBookingType('ROUNDTRIP')
                   setSelectingLeg('return')
+                  setReturnTrip(null)
+                  setReturnResults([])
+                  setReturnSearchError('Buscando viajes de vuelta más cercanos a la ida...')
                 }}
               >
                 <Text style={[styles.segmentText, bookingType === 'ROUNDTRIP' && styles.segmentTextActive]}>Ida y vuelta</Text>
@@ -503,6 +515,7 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
               <TouchableOpacity style={styles.secondaryBtn} onPress={loadReturnTrips} disabled={loadingReturn}>
                 <Text style={styles.secondaryBtnText}>{loadingReturn ? 'Buscando...' : 'Actualizar viajes de vuelta'}</Text>
               </TouchableOpacity>
+
             </View>
           )}
 
@@ -732,6 +745,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bookingCardTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+  helperText: { fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 18 },
   segmentRow: { flexDirection: 'row', gap: 8 },
   segmentBtn: {
     flex: 1,
