@@ -2,6 +2,8 @@ import { createStripeCheckoutSession, getTrips } from '@/lib/api'
 import { createURL } from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import React from 'react'
+import { parseLocalDateTime, formatDateTime, durationLabel } from '../../utils/date'
+import { homeStyles as styles } from '../../styles/homestyles'
 import {
   ActivityIndicator,
   Alert,
@@ -40,38 +42,38 @@ type PassengerForm = {
   email: string
 }
 
-function parseLocalDateTime(value?: string) {
-  const raw = String(value || '').trim()
-  if (!raw) return new Date(NaN)
-  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/)
-  if (m) {
-    const [, y, mo, d, h, mi, s] = m
-    return new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s || '0'))
-  }
-  return new Date(raw)
-}
+// function parseLocalDateTime(value?: string) {
+//   const raw = String(value || '').trim()
+//   if (!raw) return new Date(NaN)
+//   const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/)
+//   if (m) {
+//     const [, y, mo, d, h, mi, s] = m
+//     return new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s || '0'))
+//   }
+//   return new Date(raw)
+// }
 
-function formatDateTime(value?: string) {
-  const d = parseLocalDateTime(value)
-  if (Number.isNaN(d.getTime())) return 'Fecha pendiente'
-  return d.toLocaleString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+// function formatDateTime(value?: string) {
+//   const d = parseLocalDateTime(value)
+//   if (Number.isNaN(d.getTime())) return 'Fecha pendiente'
+//   return d.toLocaleString('es-ES', {
+//     day: '2-digit',
+//     month: '2-digit',
+//     year: 'numeric',
+//     hour: '2-digit',
+//     minute: '2-digit',
+//   })
+// }
 
-function durationLabel(start?: string, end?: string) {
-  const a = parseLocalDateTime(start)
-  const b = parseLocalDateTime(end)
-  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 'Duracion pendiente'
-  const mins = Math.max(0, Math.round((b.getTime() - a.getTime()) / 60000))
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return `${h}h ${m}m`
-}
+// function durationLabel(start?: string, end?: string) {
+//   const a = parseLocalDateTime(start)
+//   const b = parseLocalDateTime(end)
+//   if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 'Duracion pendiente'
+//   const mins = Math.max(0, Math.round((b.getTime() - a.getTime()) / 60000))
+//   const h = Math.floor(mins / 60)
+//   const m = mins % 60
+//   return `${h}h ${m}m`
+// }
 
 function seatsLeft(t: TripItem) {
   return Math.max(0, Number(t.capacity || 0) - Number(t.seatsSold || 0))
@@ -597,207 +599,213 @@ function BookingModal({ trip, visible, onClose }: BookingModalProps) {
   )
 }
 
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#f1f5f9' },
-  topHeader: {
-    backgroundColor: '#1A2E6C',
-    height: 88,
-    paddingTop: 34,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  menuBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  menuIcon: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  logo: { width: 44, height: 44, marginLeft: 6 },
-  logoTextContainer: { flexDirection: 'row', alignItems: 'baseline', marginLeft: 8 },
-  logoTextBJourney: { fontSize: 20, fontWeight: '800', color: '#ffffff' },
-  logoTextGo: { fontSize: 20, fontWeight: '800', color: '#FF6B35', marginLeft: 4 },
-  searchContainer: { paddingHorizontal: 12, marginTop: 10 },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#e6e9ef',
-  },
-  searchIcon: { fontSize: 20, marginRight: 8, color: '#94a3b8' },
-  searchInput: { flex: 1, height: 44, color: '#0f172a', fontSize: 15 },
-  content: { padding: 16, paddingBottom: 120 },
-  promoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 22,
-    marginVertical: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  promoTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a' },
-  promoSubtitle: { fontSize: 13, fontWeight: '600', color: '#475569', marginTop: 6 },
-  gridCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  tile: { width: '48%', alignItems: 'center', justifyContent: 'flex-start' },
-  tileImage: {
-    width: '100%',
-    height: 140,
-    borderRadius: 10,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#e6eef8',
-  },
-  tileImageInner: { width: '100%', height: '100%', borderRadius: 10 },
-  tileTitle: { marginTop: 12, fontWeight: '900', color: '#0f172a', textAlign: 'center', fontSize: 14 },
-  resultsCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  resultsTitle: { fontSize: 18, fontWeight: '800', color: '#111827', marginBottom: 8 },
-  tripCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    padding: 12,
-    marginTop: 8,
-  },
-  tripRoute: { fontSize: 15, fontWeight: '700', color: '#1f2937' },
-  tripMeta: { fontSize: 13, color: '#6b7280', marginTop: 4 },
-  seatsAvailable: { color: '#059669', fontWeight: '600' },
-  seatsUnavailable: { color: '#dc2626', fontWeight: '600' },
-  loadingRow: { marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  loadingText: { color: '#4b5563', fontSize: 14, fontWeight: '600' },
-  emptyText: { fontSize: 14, color: '#6b7280', fontStyle: 'italic', marginTop: 8 },
-  primaryBtn: {
-    marginTop: 8,
-    backgroundColor: '#F07820',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  primaryBtnText: { color: '#fff', fontSize: 14, fontWeight: '800' },
-  secondaryBtn: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#F07820',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  secondaryBtnText: { color: '#F07820', fontSize: 14, fontWeight: '800' },
-  btnDisabled: { opacity: 0.5 },
-  // Modal Styles
-  modalScreen: { flex: 1, backgroundColor: '#f1f5f9' },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  modalCloseBtn: { fontSize: 16, fontWeight: '700', color: '#F07820' },
-  modalTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
-  modalContent: { padding: 16, paddingBottom: 50 },
-  tripSummaryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  tripSummaryTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  tripSummaryText: { fontSize: 15, fontWeight: '700', color: '#1f2937' },
-  tripSummaryMeta: { fontSize: 13, color: '#6b7280', marginTop: 4 },
-  bookingCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  bookingCardTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  helperText: { fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 18 },
-  segmentRow: { flexDirection: 'row', gap: 8 },
-  segmentBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  segmentBtnActive: { borderColor: '#F07820', backgroundColor: '#fff7ed' },
-  segmentText: { color: '#374151', fontSize: 14, fontWeight: '700' },
-  segmentTextActive: { color: '#b45309' },
-  input: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: '#111827',
-    fontSize: 14,
-    backgroundColor: '#ffffff',
-  },
-  tripOption: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    padding: 10,
-    marginTop: 8,
-  },
-  tripOptionRoute: { fontSize: 14, fontWeight: '700', color: '#1f2937' },
-  tripOptionMeta: { fontSize: 12, color: '#6b7280', marginTop: 3 },
-  returnSummary: {
-    backgroundColor: '#dbeafe',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#93c5fd',
-    padding: 12,
-    marginBottom: 12,
-  },
-  returnSummaryText: { fontSize: 14, fontWeight: '700', color: '#1e40af' },
-  returnSummaryMeta: { fontSize: 12, color: '#1e3a8a', marginTop: 4 },
-  passengerCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    padding: 12,
-    marginTop: 8,
-  },
-  passengerTitle: { fontSize: 14, fontWeight: '700', color: '#1f2937', marginBottom: 8 },
-  largeBtn: { paddingVertical: 14, marginTop: 16 },
-})
+// const styles = StyleSheet.create({
+//   screen: { flex: 1, backgroundColor: '#f1f5f9' },
+//   topHeader: {
+//     backgroundColor: '#1A2E6C',
+//     height: 88,
+//     paddingTop: 34,
+//     paddingHorizontal: 14,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   menuBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
+//   menuIcon: { color: '#fff', fontSize: 22, fontWeight: '700' },
+//   logo: { width: 44, height: 44, marginLeft: 6 },
+//   logoTextContainer: { flexDirection: 'row', alignItems: 'baseline', marginLeft: 8 },
+//   logoTextBJourney: { fontSize: 20, fontWeight: '800', color: '#ffffff' },
+//   logoTextGo: { fontSize: 20, fontWeight: '800', color: '#FF6B35', marginLeft: 4 },
+//   searchContainer: {},
+
+//   searchBox: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#fff',
+//     borderRadius: 8,
+//     height: 90,
+//     paddingHorizontal: 12,
+//     borderWidth: 1,
+//     borderColor: '#e6e9ef',
+//     elevation: 20,
+//   },
+//   searchIcon: { fontSize: 20, marginRight: 8, color: '#94a3b8' },
+//   searchInput: { flex: 1, height: 44, color: '#0f172a', fontSize: 15 },
+//   content: { padding: 16, paddingBottom: 120 },
+//   promoCard: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 22,
+//     marginVertical: 12,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     elevation: 3,
+//     marginTop: 25,
+//   },
+//   promoTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a' },
+//   promoSubtitle: { fontSize: 13, fontWeight: '600', color: '#475569', marginTop: 6 },
+//   gridCard: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 16,
+//     marginTop: 30,
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     elevation: 3,
+//     height: 300,
+    
+//   },
+//   tile: { width: '48%', alignItems: 'center', justifyContent: 'flex-start' },
+//   tileImage: {
+//     width: '100%',
+//     height: 230,
+//     borderRadius: 10,
+//     overflow: 'hidden',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: '#e6eef8',
+//   },
+//   tileImageInner: { width: '100%', height: '100%', borderRadius: 10},
+//   tileTitle: { marginTop: 12, fontWeight: '900', color: '#0f172a', textAlign: 'center', fontSize: 14 },
+//   resultsCard: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 14,
+//     marginTop: 12,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     elevation: 3,
+//   },
+//   resultsTitle: { fontSize: 18, fontWeight: '800', color: '#111827', marginBottom: 8 },
+//   tripCard: {
+//     backgroundColor: '#f9fafb',
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb',
+//     padding: 12,
+//     marginTop: 8,
+//   },
+//   tripRoute: { fontSize: 15, fontWeight: '700', color: '#1f2937' },
+//   tripMeta: { fontSize: 13, color: '#6b7280', marginTop: 4 },
+//   seatsAvailable: { color: '#059669', fontWeight: '600' },
+//   seatsUnavailable: { color: '#dc2626', fontWeight: '600' },
+//   loadingRow: { marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
+//   loadingText: { color: '#4b5563', fontSize: 14, fontWeight: '600' },
+//   emptyText: { fontSize: 14, color: '#6b7280', fontStyle: 'italic', marginTop: 8 },
+//   primaryBtn: {
+//     marginTop: 8,
+//     backgroundColor: '#F07820',
+//     borderRadius: 10,
+//     paddingVertical: 10,
+//     alignItems: 'center',
+//   },
+//   primaryBtnText: { color: '#fff', fontSize: 14, fontWeight: '800' },
+//   secondaryBtn: {
+//     marginTop: 8,
+//     borderWidth: 1,
+//     borderColor: '#F07820',
+//     borderRadius: 10,
+//     paddingVertical: 10,
+//     alignItems: 'center',
+//   },
+//   secondaryBtnText: { color: '#F07820', fontSize: 14, fontWeight: '800' },
+//   btnDisabled: { opacity: 0.5 },
+//   // Modal Styles
+//   modalScreen: { flex: 1, backgroundColor: '#f1f5f9' },
+//   modalHeader: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     paddingVertical: 12,
+//     paddingHorizontal: 16,
+//     backgroundColor: '#fff',
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#e5e7eb',
+//   },
+//   modalCloseBtn: { fontSize: 16, fontWeight: '700', color: '#F07820' },
+//   modalTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+//   modalContent: { padding: 16, paddingBottom: 50 },
+//   tripSummaryCard: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 14,
+//     marginBottom: 12,
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb',
+//   },
+//   tripSummaryTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+//   tripSummaryText: { fontSize: 15, fontWeight: '700', color: '#1f2937' },
+//   tripSummaryMeta: { fontSize: 13, color: '#6b7280', marginTop: 4 },
+//   bookingCard: {
+//     backgroundColor: '#fff',
+//     borderRadius: 12,
+//     padding: 14,
+//     marginBottom: 12,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     elevation: 3,
+//   },
+//   bookingCardTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+//   helperText: { fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 18 },
+//   segmentRow: { flexDirection: 'row', gap: 8 },
+//   segmentBtn: {
+//     flex: 1,
+//     borderWidth: 1,
+//     borderColor: '#d1d5db',
+//     borderRadius: 10,
+//     paddingVertical: 10,
+//     alignItems: 'center',
+//     backgroundColor: '#f9fafb',
+//   },
+//   segmentBtnActive: { borderColor: '#F07820', backgroundColor: '#fff7ed' },
+//   segmentText: { color: '#374151', fontSize: 14, fontWeight: '700' },
+//   segmentTextActive: { color: '#b45309' },
+//   input: {
+//     marginTop: 8,
+//     borderWidth: 1,
+//     borderColor: '#d1d5db',
+//     borderRadius: 10,
+//     paddingHorizontal: 12,
+//     paddingVertical: 10,
+//     color: '#111827',
+//     fontSize: 14,
+//     backgroundColor: '#ffffff',
+//   },
+//   tripOption: {
+//     backgroundColor: '#f9fafb',
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb',
+//     padding: 10,
+//     marginTop: 8,
+//   },
+//   tripOptionRoute: { fontSize: 14, fontWeight: '700', color: '#1f2937' },
+//   tripOptionMeta: { fontSize: 12, color: '#6b7280', marginTop: 3 },
+//   returnSummary: {
+//     backgroundColor: '#dbeafe',
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: '#93c5fd',
+//     padding: 12,
+//     marginBottom: 12,
+//   },
+//   returnSummaryText: { fontSize: 14, fontWeight: '700', color: '#1e40af' },
+//   returnSummaryMeta: { fontSize: 12, color: '#1e3a8a', marginTop: 4 },
+//   passengerCard: {
+//     backgroundColor: '#f9fafb',
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb',
+//     padding: 12,
+//     marginTop: 8,
+//   },
+//   passengerTitle: { fontSize: 14, fontWeight: '700', color: '#1f2937', marginBottom: 8 },
+//   largeBtn: { paddingVertical: 14, marginTop: 16 },
+// })
