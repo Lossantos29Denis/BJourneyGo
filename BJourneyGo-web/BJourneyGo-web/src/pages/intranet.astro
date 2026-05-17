@@ -25,30 +25,6 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Intranet — BJourneyGo">
   <div class="page-wrapper">
     <main class="container page-content">
-      <nav class="intranet-nav" aria-label="Intranet navigation">
-        <a href="/estadisticas" class="btn btn--ghost btn--small">Estadísticas</a>
-        <a href="/gestion-usuarios" class="btn btn--ghost btn--small">Gestión de usuarios</a>
-        <a href="/intranet/operadores-scanner" class="btn btn--ghost btn--small">Operadores scanner</a>
-        <a href="/intranet/agencias" class="btn btn--ghost btn--small">Gestión de agencias</a>
-        <a href="/gestion-billetes" class="btn btn--ghost btn--small">Gestión de billetes</a>
-        <a href="/intranet/escaner-qr" class="btn btn--ghost btn--small">Escáner QR</a>
-        <a href="/intranet/documentos" class="btn btn--ghost btn--small">Documentos</a>
-      </nav>
-
-      <section class="admin-shortcuts" id="adminShortcuts" hidden>
-        <div class="admin-shortcuts__header">
-          <span>Administración QR</span>
-          <p>Accesos directos para crear usuarios con permiso scanner y asignar viajes a operadores.</p>
-        </div>
-        <div class="admin-shortcuts__actions">
-          <a href="/gestion-usuarios" class="btn btn--primary btn--small">Crear usuarios scanner</a>
-          <a href="/intranet/operadores-scanner" class="btn btn--ghost btn--small">Configurar operadores y viajes</a>
-          <a href="/intranet/escaner-qr" class="btn btn--ghost btn--small">Abrir escáner operativo</a>
-        </div>
-      </section>
-
-      <div id="intranetBuildStamp" class="build-stamp" hidden>Build intranet: 2026-04-08 scanner-ops-v2</div>
-
       <section class="intranet-hero">
         <h1 id="heroTitle">Intranet BJourneyGo</h1>
         <p class="lead" id="heroLead">Área privada para empleados. Gestión interna y recursos.</p>
@@ -147,23 +123,11 @@ import Layout from '../layouts/Layout.astro';
   .page-wrapper{min-height:100vh;display:flex;flex-direction:column}
   .page-content{flex:1;padding-bottom:1.5rem}
 
-  /* Navegación horizontal para escritorio, columna en móvil */
-  .intranet-nav{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0 1.5rem 0}
-  .intranet-nav .btn{border-radius:10px;padding:.45rem .8rem;font-weight:600}
-  .intranet-nav .btn:hover{transform:translateY(-2px)}
-
-  .admin-shortcuts{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(249,115,22,.05));border:1px solid rgba(249,115,22,.2);border-radius:14px;padding:1rem 1.1rem;margin:0 0 1.25rem 0}
-  .admin-shortcuts__header{display:grid;gap:.2rem}
-  .admin-shortcuts__header span{font-weight:800;color:var(--accent-1);letter-spacing:.3px;text-transform:uppercase;font-size:.8rem}
-  .admin-shortcuts__header p{margin:0;color:var(--text-muted);font-size:.95rem}
-  .admin-shortcuts__actions{display:flex;gap:.6rem;flex-wrap:wrap}
-  .build-stamp{margin:0 0 .8rem 0;padding:.5rem .7rem;border-radius:10px;border:1px dashed rgba(249,115,22,.35);background:rgba(249,115,22,.08);color:#9a3412;font-size:.82rem;font-weight:700;display:inline-block}
-
     .intranet-hero{margin:1rem 0 1.5rem 0;text-align:center}
     .intranet-hero h1{margin:0 0 .5rem 0;color:var(--accent-1);font-size:2rem;font-weight:700;letter-spacing:-0.5px}
     .lead{color:var(--text-muted);margin:0 auto 2rem auto;max-width:640px;font-size:1.05rem}
 
-    .intranet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;margin-bottom:2rem}
+    .intranet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
 
     .intranet-card{background:var(--card);padding:1.75rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);transition:all .25s ease;display:flex;flex-direction:column;gap:.75rem}
     .intranet-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px var(--shadow-hover);border-color:var(--accent-1)}
@@ -177,10 +141,6 @@ import Layout from '../layouts/Layout.astro';
     .session-info{background:var(--card);padding:1.5rem;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);max-width:700px;margin:0 auto}
     .session-info h3{margin:0 0 .75rem 0;color:var(--text);font-size:1.15rem}
     .session-info p{color:var(--text-muted);margin-bottom:1rem}
-
-    @media (max-width:900px){
-      .intranet-grid{grid-template-columns:repeat(2,1fr)}
-    }
 
     @media (max-width:620px){
       /* Mantener formato columna en móvil */
@@ -218,7 +178,7 @@ import Layout from '../layouts/Layout.astro';
       const agencyName = localStorage.getItem('agencyName') || '';
       
       // Update hero based on role
-        if (!isAdmin && role === 'agency') {
+      if (!isAdmin && role === 'agency') {
         document.getElementById('heroTitle').textContent = `Portal de Agencia`;
         document.getElementById('heroLead').textContent = `Bienvenido ${agencyName}. Gestiona tus rutas y consulta estadísticas.`;
         document.getElementById('sessionInfo').textContent = `Conectado como: ${user} (${agencyName})`;
@@ -231,14 +191,6 @@ import Layout from '../layouts/Layout.astro';
           if (!roles.includes('agency')) card.style.display = 'none';
         });
 
-        const nav = document.querySelector('.intranet-nav');
-        if (nav) {
-          const allowedAgencyLinks = new Set(['/estadisticas', '/intranet/operadores-scanner', '/gestion-billetes']);
-          nav.querySelectorAll('a').forEach(link => {
-            const href = link.getAttribute('href') || '';
-            if (!allowedAgencyLinks.has(href)) link.style.display = 'none';
-          });
-        }
       } else if (!isAdmin && role === 'scanner') {
         document.getElementById('heroTitle').textContent = `Portal de Escaneo`;
         document.getElementById('heroLead').textContent = `Bienvenido ${user}. Utiliza este panel para validar billetes QR.`;
@@ -250,38 +202,8 @@ import Layout from '../layouts/Layout.astro';
           const roles = (card.getAttribute('data-roles') || '').split(',').map(r => r.trim());
           if (!roles.includes('scanner')) card.style.display = 'none';
         });
-
-        const nav = document.querySelector('.intranet-nav');
-        nav.querySelectorAll('a').forEach(link => {
-          const href = link.getAttribute('href') || '';
-          if (href !== '/intranet/escaner-qr') link.style.display = 'none';
-        });
       } else {
         document.getElementById('sessionInfo').textContent = `Conectado como: ${user} (administrador)`;
-        const adminShortcuts = document.getElementById('adminShortcuts');
-        if (adminShortcuts) adminShortcuts.hidden = false;
-        const buildStamp = document.getElementById('intranetBuildStamp');
-        if (buildStamp) buildStamp.hidden = false;
-
-        // Hard fallback: if some stale UI logic hid links, force-show scanner admin entries for admins.
-        const nav = document.querySelector('.intranet-nav');
-        if (nav) {
-          const forceLinks = [
-            { href: '/intranet/operadores-scanner', text: 'Operadores scanner' },
-            { href: '/intranet/escaner-qr', text: 'Escáner QR' }
-          ];
-          forceLinks.forEach((item) => {
-            let link = nav.querySelector(`a[href="${item.href}"]`);
-            if (!link) {
-              link = document.createElement('a');
-              link.setAttribute('href', item.href);
-              link.className = 'btn btn--ghost btn--small';
-              link.textContent = item.text;
-              nav.appendChild(link);
-            }
-            link.style.display = '';
-          });
-        }
       }
     }
 
