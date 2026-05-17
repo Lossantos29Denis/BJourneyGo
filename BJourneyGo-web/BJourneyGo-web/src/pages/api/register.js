@@ -1,10 +1,8 @@
-function getApiUrl() {
-  return process.env.API_URL || 'http://localhost:4000'
-}
+import { forwardJson, readJsonBody } from './_lib/proxy.js';
 
 export async function POST({ request }) {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request, {})
     const { email, password, name } = body;
 
     if (!email || !password) {
@@ -15,13 +13,10 @@ export async function POST({ request }) {
     }
 
     // Forward to central API
-    const resp = await fetch(`${getApiUrl()}/auth/register`, {
+    return forwardJson(request, '/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name })
+      body: { email, password, name },
     })
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
   } catch (error) {
     console.error('Register proxy error:', error);
     return new Response(

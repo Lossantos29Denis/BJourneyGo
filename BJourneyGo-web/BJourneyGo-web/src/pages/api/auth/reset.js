@@ -1,15 +1,9 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
+import { forwardJson, readJsonBody } from '../_lib/proxy.js'
 
 export async function POST({ request }) {
   try {
-    const body = await request.json().catch(() => ({}))
-    const resp = await fetch(`${API_URL}/auth/reset`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    const json = await resp.json().catch(() => ({}))
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
+    const body = await readJsonBody(request, {})
+    return forwardJson(request, '/auth/reset', { method: 'POST', body })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }

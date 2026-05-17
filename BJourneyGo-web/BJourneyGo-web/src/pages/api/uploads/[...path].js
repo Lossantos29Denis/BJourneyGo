@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
+import { forwardStream } from '../_lib/proxy.js'
 
 function normalizePath(input) {
   if (!input) return ''
@@ -16,27 +16,14 @@ export async function GET({ params }) {
       })
     }
 
-    const upstream = await fetch(`${API_URL}/uploads/${path}`)
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '')
-      return new Response(text || JSON.stringify({ error: 'file not found' }), {
-        status: upstream.status,
-        headers: { 'Content-Type': upstream.headers.get('content-type') || 'application/json' }
-      })
-    }
-
-    const headers = new Headers()
-    const contentType = upstream.headers.get('content-type')
-    const contentDisposition = upstream.headers.get('content-disposition')
-    const contentLength = upstream.headers.get('content-length')
-    const cacheControl = upstream.headers.get('cache-control')
-
-    if (contentType) headers.set('Content-Type', contentType)
-    if (contentDisposition) headers.set('Content-Disposition', contentDisposition)
-    if (contentLength) headers.set('Content-Length', contentLength)
-    if (cacheControl) headers.set('Cache-Control', cacheControl)
-
-    return new Response(upstream.body, { status: 200, headers })
+    return forwardStream({ headers: new Headers() }, `/uploads/${path}`, {
+      passthroughHeaders: [
+        'content-type',
+        'content-disposition',
+        'content-length',
+        'cache-control',
+      ],
+    })
   } catch (_e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), {
       status: 500,

@@ -1,12 +1,14 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
+import { forwardJson } from './_lib/proxy.js'
 
 export async function GET({ request }) {
   try {
     const url = new URL(request.url)
     const qs = url.searchParams.toString()
-    const resp = await fetch(`${API_URL}/trips${qs ? `?${qs}` : ''}`)
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
+    return forwardJson(request, `/trips${qs ? `?${qs}` : ''}`, {
+      responseHeaders: {
+        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300'
+      }
+    })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }

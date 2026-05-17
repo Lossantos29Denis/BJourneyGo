@@ -1,8 +1,8 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
+import { forwardJson, readJsonBody } from './_lib/proxy.js';
 
 export async function POST({ request }) {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request, {})
     const { identity, email, password } = body;
     const normalizedIdentity = identity || email;
 
@@ -14,13 +14,10 @@ export async function POST({ request }) {
     }
 
     // Forward to central API
-    const resp = await fetch(`${API_URL}/auth/login`, {
+    return forwardJson(request, '/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: normalizedIdentity, password })
+      body: { email: normalizedIdentity, password },
     })
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
   } catch (error) {
     console.error('Login proxy error:', error);
     return new Response(

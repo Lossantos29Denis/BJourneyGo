@@ -1,24 +1,12 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
-
-function copyAuth(request) {
-  const headers = { 'Content-Type': 'application/json' }
-  const auth = request.headers.get('authorization')
-  if (auth) headers['Authorization'] = auth
-  return headers
-}
+import { forwardJson, readJsonBody } from '../_lib/proxy.js'
 
 export async function POST({ request }) {
   try {
-    const body = await request.json()
-    const resp = await fetch(`${API_URL}/tickets/verify-qr`, {
+    const body = await readJsonBody(request, {})
+    return forwardJson(request, '/tickets/verify-qr', {
       method: 'POST',
-      headers: copyAuth(request),
-      body: JSON.stringify(body || {})
-    })
-    const json = await resp.json().catch(() => ({}))
-    return new Response(JSON.stringify(json), {
-      status: resp.status,
-      headers: { 'Content-Type': 'application/json' }
+      body,
+      forwardAuth: true,
     })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), {

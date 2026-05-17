@@ -1,19 +1,14 @@
-const API_URL = process.env.API_URL || 'http://localhost:4000'
-
-function copyAuth(request) {
-  const headers = { 'Content-Type': 'application/json' }
-  const auth = request.headers.get('authorization')
-  if (auth) headers['Authorization'] = auth
-  return headers
-}
+import { forwardJson, readJsonBody } from '../../_lib/proxy.js'
 
 export async function PUT({ request, params }) {
   try {
     const id = params.id
-    const body = await request.json()
-    const resp = await fetch(`${API_URL}/admin/trips/${id}`, { method: 'PUT', headers: copyAuth(request), body: JSON.stringify(body) })
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
+    const body = await readJsonBody(request, {})
+    return forwardJson(request, `/admin/trips/${id}`, {
+      method: 'PUT',
+      body,
+      forwardAuth: true,
+    })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
@@ -22,9 +17,7 @@ export async function PUT({ request, params }) {
 export async function DELETE({ request, params }) {
   try {
     const id = params.id
-    const resp = await fetch(`${API_URL}/admin/trips/${id}`, { method: 'DELETE', headers: copyAuth(request) })
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
+    return forwardJson(request, `/admin/trips/${id}`, { method: 'DELETE', forwardAuth: true })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
@@ -33,9 +26,7 @@ export async function DELETE({ request, params }) {
 export async function GET({ request, params }) {
   try {
     const id = params.id
-    const resp = await fetch(`${API_URL}/admin/trips/${id}`, { headers: copyAuth(request) })
-    const json = await resp.json()
-    return new Response(JSON.stringify(json), { status: resp.status, headers: { 'Content-Type': 'application/json' } })
+    return forwardJson(request, `/admin/trips/${id}`, { forwardAuth: true })
   } catch (e) {
     return new Response(JSON.stringify({ error: 'proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
