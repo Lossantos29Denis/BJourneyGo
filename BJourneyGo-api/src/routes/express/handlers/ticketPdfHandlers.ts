@@ -7,7 +7,7 @@ import { extractOptionalUserId } from '../utils/paymentUtils'
 const JWT_SECRET_PAYMENTS = process.env.JWT_SECRET_PAYMENTS || process.env.JWT_SECRET || ''
 
 export function registerTicketPdfHandlers(router: any) {
-  router.get('/tickets/:uuid/pdf', async (req: any, res) => {
+  router.get('/tickets/:uuid/pdf', async (req: any, res: any) => {
     const { uuid } = req.params || {}
     if (!uuid || typeof uuid !== 'string') {
       return res.status(400).json({ error: 'uuid required' })

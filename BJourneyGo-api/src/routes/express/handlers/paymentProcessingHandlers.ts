@@ -172,7 +172,7 @@ export async function processPaymentCapture(params: { provider: string; provider
 }
 
 export function registerPaymentProcessingHandlers(router: any) {
-  router.post('/reconcile', async (req: any, res) => {
+  router.post('/reconcile', async (req: any, res: any) => {
     // Optional webhook signature verification
     try {
       if (PAYMENT_WEBHOOK_SECRET) {
@@ -207,7 +207,7 @@ export function registerPaymentProcessingHandlers(router: any) {
     }
   })
 
-  router.post('/test-purchase', async (req: any, res) => {
+  router.post('/test-purchase', async (req: any, res: any) => {
     if (process.env.DISABLE_TEST_PURCHASE === 'true') {
       return res.status(403).json({ error: 'Test endpoints are not available' })
     }

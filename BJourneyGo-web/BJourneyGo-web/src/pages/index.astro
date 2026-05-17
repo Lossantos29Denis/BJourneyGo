@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import '../styles/landing.css';
-import { Image } from 'astro:assets';
 import bjournetLogo from '../assets/bjournet-removebg-preview.png';
 ---
 
@@ -19,7 +18,7 @@ import bjournetLogo from '../assets/bjournet-removebg-preview.png';
           </div>
         </div>
         <div class="hero-image">
-          <Image src={bjournetLogo} alt="Logo BJourneyGo" class="hero-logo" quality="max" />
+          <img src={bjournetLogo.src} alt="Logo BJourneyGo" class="hero-logo" />
         </div>
       </div>
     </section>

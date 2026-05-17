@@ -22,7 +22,7 @@ function generateReferenceCode(length = 10): string {
 }
 
 export function registerStripePaymentHandlers(router: any) {
-  router.post('/stripe/checkout', async (req: any, res) => {
+  router.post('/stripe/checkout', async (req: any, res: any) => {
     const { quantity = 1, passengers: rawPassengers = [], contactEmail: rawContactEmail = '', successUrl: rawSuccessUrl = '', cancelUrl: rawCancelUrl = '' } = req.body || {}
     const qty = Number(quantity)
     if (!stripe) return res.status(500).json({ error: 'stripe not configured' })
@@ -171,7 +171,7 @@ export function registerStripePaymentHandlers(router: any) {
     }
   })
 
-  router.post('/stripe/confirm', async (req: any, res) => {
+  router.post('/stripe/confirm', async (req: any, res: any) => {
     const { sessionId } = req.body || {}
     if (!stripe) return res.status(500).json({ error: 'stripe not configured' })
     if (!sessionId) return res.status(400).json({ error: 'sessionId required' })
