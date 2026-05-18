@@ -3,12 +3,13 @@ import { StyleSheet } from 'react-native'
 export const homeStyles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: '#f1f5f9' },
     topHeader: {
-        backgroundColor: '#1A2E6C',
-        height: 88,
+        backgroundColor: '#F07820',
+        height: 110,
         paddingTop: 34,
         paddingHorizontal: 14,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center'
     },
     menuBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
     menuIcon: { color: '#fff', fontSize: 22, fontWeight: '700' },

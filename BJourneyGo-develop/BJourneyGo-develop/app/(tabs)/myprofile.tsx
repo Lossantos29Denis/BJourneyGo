@@ -94,8 +94,8 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   topHeader: {
-    backgroundColor: '#F0833F',
-    height: 100,
+    backgroundColor: '#F07820',
+    height: 110,
     width: '100%',
     paddingTop: 20,
     justifyContent: 'center',

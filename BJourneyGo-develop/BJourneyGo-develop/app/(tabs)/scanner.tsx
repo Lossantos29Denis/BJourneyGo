@@ -248,6 +248,37 @@ export default function ScannerScreen() {
           {trips.length === 0 ? (
             <Text style={styles.helper}>No hay viajes disponibles para escaneo.</Text>
           ) : (
+            <ScrollView
+              style={{ flexGrow: 0 }}
+              nestedScrollEnabled
+              contentContainerStyle={{ paddingVertical: 2 }}
+            >
+              {trips.map((trip) => {
+                const selected = selectedTripId === Number(trip.id)
+                const isActive = Number(activeSession?.tripId || 0) === Number(trip.id)
+                return (
+                  <TouchableOpacity
+                    key={String(trip.id)}
+                    style={[styles.tripItem, selected && styles.tripItemSelected]}
+                    onPress={() => setSelectedTripId(Number(trip.id))}
+                  >
+                    <View style={styles.tripHeaderRow}>
+                      <Text style={styles.tripTitle}>{(trip.origin || '—') + ' -> ' + (trip.destination || '—')}</Text>
+                      {isActive ? <Text style={styles.activeBadge}>ACTIVO</Text> : null}
+                    </View>
+                    <Text style={styles.tripMeta}>ID {trip.id} • {trip.routeCode || 'Sin código'}</Text>
+                    <Text style={styles.tripMeta}>Salida: {formatDate(trip.departureAt)}</Text>
+                    <Text style={styles.tripMeta}>Llegada: {formatDate(trip.arrivalAt)}</Text>
+                  </TouchableOpacity>
+                )
+              })}
+            </ScrollView>
+          )}
+        </View>
+        {/* <View style={styles.tripListWrap}>
+          {trips.length === 0 ? (
+            <Text style={styles.helper}>No hay viajes disponibles para escaneo.</Text>
+          ) : (
             trips.map((trip) => {
               const selected = selectedTripId === Number(trip.id)
               const isActive = Number(activeSession?.tripId || 0) === Number(trip.id)
@@ -268,7 +299,7 @@ export default function ScannerScreen() {
               )
             })
           )}
-        </View>
+        </View> */}
         <TextInput
           style={[styles.input, { marginTop: 10 }]}
           placeholder="Código de acceso (opcional)"
@@ -420,7 +451,7 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#F4F4F4' },
   topHeader: {
-    backgroundColor: '#224F9A',
+    backgroundColor: '#F07820',
     height: 96,
     width: '100%',
     paddingTop: Platform.OS === 'ios' ? 36 : 12,
@@ -431,12 +462,13 @@ const styles = StyleSheet.create({
   section: { paddingHorizontal: 14, paddingTop: 12 },
   label: { fontWeight: '700', color: '#1F2937', marginBottom: 6 },
   tripListWrap: {
-    maxHeight: 220,
+    maxHeight: 300,
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 10,
     backgroundColor: '#fff',
     padding: 8,
+    flexShrink: 1,
   },
   tripItem: {
     borderWidth: 1,
