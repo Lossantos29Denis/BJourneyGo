@@ -86,8 +86,8 @@ export default function ScannerUsersScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#F4F4F4' },
   topHeader: {
-    backgroundColor: '#224F9A',
-    height: 96,
+    backgroundColor: '#F07820',
+    height: 110,
     width: '100%',
     paddingTop: Platform.OS === 'ios' ? 36 : 12,
     justifyContent: 'center',

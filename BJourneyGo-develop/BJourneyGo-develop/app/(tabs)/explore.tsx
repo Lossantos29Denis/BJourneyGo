@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBEB',
   },
   topHeader: {
-    height: 96,
+    height: 110,
     paddingTop: 14,
     backgroundColor: '#F07820',
     flexDirection: 'row',
