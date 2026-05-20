@@ -111,6 +111,8 @@ export let image = '/social-card.svg';
 		</footer>
 
 		<script type="module">
+			import { clearAuth } from '/src/scripts/api.js';
+
 			// Manage user menu and auth state
 			const guestMenu = document.getElementById('guestMenu');
 			const guestMenuToggle = document.getElementById('guestMenuToggle');
@@ -161,9 +163,7 @@ export let image = '/social-card.svg';
 
 			// Logout handler
 			logoutBtn?.addEventListener('click', () => {
-				localStorage.removeItem('auth');
-				localStorage.removeItem('user');
-				localStorage.removeItem('isAdmin');
+				clearAuth();
 				location.replace('/');
 			});
 
