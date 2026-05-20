@@ -1,8 +1,8 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import fs from 'fs'
 import multer from 'multer'
 import path from 'path'
-import { createDocument, deleteDocument, listDocuments, updateDocument } from '../services/adminDocumentsService'
+import { createDocument, deleteDocument, getDocumentById, listDocuments, updateDocument } from '../services/adminDocumentsService'
 import { getAgencyId, isAgency, requireAdmin, requireAuth } from '../utils/adminUtils'
 
 const maxUploadBytes = Number(process.env.DOCS_MAX_UPLOAD_BYTES || 25 * 1024 * 1024)
@@ -38,20 +38,93 @@ function formatFileSize(bytes: number) {
 
 export function registerAdminDocumentsHandlers(router: Router) {
   // POST /admin/documents/upload
-  router.post('/documents/upload', requireAuth, requireAdmin, upload.single('file'), async (req: any, res) => {
+  router.post('/documents/upload', requireAuth, requireAdmin, (req: any, res: any, next: any) => {
+    console.log('[UPLOAD] Request received:', {
+      method: req.method,
+      path: req.path,
+      url: req.url,
+      contentType: req.get('content-type'),
+      headers: req.headers,
+      isMultipart: req.is('multipart/form-data')
+    })
+    next()
+  }, upload.single('file'), async (req: any, res: Response) => {
     try {
       const file = req.file
-      if (!file) return res.status(400).json({ error: 'file required' })
-      const fileUrl = `/uploads/documents/${file.filename}`
-      const fileSize = formatFileSize(file.size)
-      res.json({ success: true, fileUrl, fileSize, originalName: file.originalname })
+      if (!file) {
+        console.error('Upload failed: no file in request')
+        return res.status(400).json({ error: 'file required' })
+      }
+      console.log('File uploaded successfully:', { filename: file.filename, size: file.size, path: file.path })
+        const fileUrl = `/uploads/documents/${file.filename}`
+        const fileSize = formatFileSize(file.size)
+        res.json({
+          success: true,
+          fileUrl,
+          fileSize,
+          originalName: file.originalname,
+          filename: file.filename,
+          filePath: file.path
+        })
+    } catch (e: any) {
+      console.error('Upload error:', e)
+      res.status(500).json({ error: String(e) })
+    }
+  }, (err: any, req: any, res: Response, next: any) => {
+    // Multer error handler
+    console.error('Multer middleware error:', err)
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'File too large' })
+    }
+    if (err.code === 'LIMIT_PART_COUNT') {
+      return res.status(400).json({ error: 'Too many parts' })
+    }
+    res.status(500).json({ error: err.message || 'Upload failed' })
+  })
+
+  // GET /admin/documents/files - list physical files in uploads/documents (admin only, for debugging)
+  router.get('/documents/files', requireAuth, requireAdmin, async (_req: any, res: Response) => {
+    try {
+      const files = fs.readdirSync(documentsDir)
+      const info = files.map((f) => {
+        try {
+          const st = fs.statSync(path.join(documentsDir, f))
+          return { filename: f, size: st.size, mtime: st.mtime }
+        } catch (err) {
+          return { filename: f, error: String(err) }
+        }
+      })
+      res.json({ success: true, files: info })
+    } catch (e: any) {
+      res.status(500).json({ error: String(e) })
+    }
+  })
+
+  // GET /admin/documents/:id/download
+  router.get('/documents/:id/download', requireAuth, requireAdmin, async (req: any, res: Response) => {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return res.status(400).json({ error: 'invalid id' })
+
+      const doc = await getDocumentById(id)
+      if (!doc?.fileUrl) return res.status(404).json({ error: 'file not found' })
+
+      const filename = path.basename(String(doc.fileUrl))
+      const filePath = path.join(documentsDir, filename)
+
+      if (!fs.existsSync(filePath)) {
+        console.warn('Download requested but file is missing on disk:', { id, filePath })
+        return res.status(404).json({ error: 'file not found on server' })
+      }
+
+      res.download(filePath, doc.title ? `${doc.title}${path.extname(filename)}` : filename)
     } catch (e: any) {
       res.status(500).json({ error: String(e) })
     }
   })
 
   // GET /admin/documents
-  router.get('/documents', requireAuth, requireAdmin, async (req: any, res) => {
+  router.get('/documents', requireAuth, requireAdmin, async (req: any, res: Response) => {
     try {
       const role = req.user?.role
       const userId = Number(req.user?.userId)
@@ -65,7 +138,7 @@ export function registerAdminDocumentsHandlers(router: Router) {
   })
 
   // POST /admin/documents
-  router.post('/documents', requireAuth, requireAdmin, async (req: any, res) => {
+  router.post('/documents', requireAuth, requireAdmin, async (req: any, res: Response) => {
     try {
       const { title, category, description, fileUrl, fileSize, agencyId } = req.body || {}
       if (!title) return res.status(400).json({ error: 'title required' })
@@ -84,7 +157,7 @@ export function registerAdminDocumentsHandlers(router: Router) {
   })
 
   // PUT /admin/documents/:id
-  router.put('/documents/:id', requireAuth, requireAdmin, async (req: any, res) => {
+  router.put('/documents/:id', requireAuth, requireAdmin, async (req: any, res: Response) => {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ error: 'invalid id' })
@@ -105,11 +178,33 @@ export function registerAdminDocumentsHandlers(router: Router) {
   })
 
   // DELETE /admin/documents/:id
-  router.delete('/documents/:id', requireAuth, requireAdmin, async (req: any, res) => {
+  router.delete('/documents/:id', requireAuth, requireAdmin, async (req: any, res: Response) => {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ error: 'invalid id' })
+      
+      // Get document to find file before deleting from DB
+      const docs: any = await listDocuments({ category: null, agencyId: null })
+      const doc = docs?.find((d: any) => d.id === id)
+      
+      // Delete document from database
       await deleteDocument(id)
+      
+      // Delete physical file if it exists
+      if (doc?.fileUrl) {
+        try {
+          const filename = doc.fileUrl.split('/').pop() // Extract filename from URL
+          const filePath = path.join(documentsDir, filename)
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath)
+            console.log('Document file deleted:', filePath)
+          }
+        } catch (fileErr: any) {
+          console.warn('Warning: Could not delete file from disk:', fileErr.message)
+          // Don't fail the API response if file deletion fails
+        }
+      }
+      
       res.json({ success: true })
     } catch (e: any) {
       res.status(500).json({ error: String(e) })

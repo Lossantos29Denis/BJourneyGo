@@ -32,36 +32,55 @@ function formatDate(value) {
 function mapCategory(category) {
   if (category === 'POLITICAS') return 'politicas'
   if (category === 'MANUALES') return 'manuales'
+  if (category === 'GENERAL') return 'recursos'
   return 'recursos'
 }
 
-function getDownloadUrl(fileUrl) {
-  const raw = String(fileUrl || '').trim()
+function getDownloadUrl(doc) {
+  const raw = String(doc?.fileUrl || '').trim()
   if (!raw) return ''
   if (raw.startsWith('/uploads/')) return `/api${raw}`
   if (raw.startsWith('uploads/')) return `/api/${raw}`
-
-  const bareFileName = /^[^/\\]+\.[a-zA-Z0-9]{2,10}$/.test(raw)
-  if (bareFileName) return `/api/uploads/documents/${raw}`
-
-  try {
-    const parsed = new URL(raw, window.location.origin)
-    const idx = parsed.pathname.indexOf('/uploads/')
-    if (idx >= 0) {
-      const uploadPath = parsed.pathname.slice(idx)
-      return `/api${uploadPath}`
-    }
-    if (parsed.pathname.startsWith('/documents/')) {
-      return `/api/uploads${parsed.pathname}`
-    }
-  } catch (_e) {
-    // fallback to raw below
-  }
-  if (raw.includes('/uploads/')) {
-    const idx = raw.indexOf('/uploads/')
-    return `/api${raw.slice(idx)}`
-  }
   return raw
+}
+
+function getFilenameFromContentDisposition(headerValue) {
+  if (!headerValue) return ''
+  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(headerValue)
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1])
+    } catch (_e) {
+      return utf8Match[1]
+    }
+  }
+  const asciiMatch = /filename="?([^";]+)"?/i.exec(headerValue)
+  return asciiMatch?.[1] || ''
+}
+
+async function downloadDocument(doc) {
+  try {
+    const res = await fetchWithAuth(getDownloadUrl(doc), { method: 'GET' })
+    if (!res.ok) throw new Error('download failed')
+
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const contentDisposition = res.headers.get('content-disposition')
+    const filenameFromHeader = getFilenameFromContentDisposition(contentDisposition)
+    const fallbackName = `${String(doc?.title || 'documento').trim() || 'documento'}`
+    const filename = filenameFromHeader || fallbackName
+
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = filename
+    link.rel = 'noopener'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(objectUrl)
+  } catch (_error) {
+    alert('No se pudo descargar el documento')
+  }
 }
 
 function renderDocuments(list) {
@@ -105,7 +124,7 @@ function renderDocuments(list) {
             <span class="doc-date">Actualizado: ${formatDate(doc.updatedAt)}</span>
             <span class="doc-size">${doc.fileSize || '-'}</span>
           </div>
-          ${doc.fileUrl ? `<a class="btn btn-primary doc-btn" href="${getDownloadUrl(doc.fileUrl)}" target="_blank" rel="noopener" download>Descargar</a>` : '<button class="btn btn-primary doc-btn" disabled>Sin archivo</button>'}
+          ${doc.fileUrl ? `<button class="btn btn-primary doc-btn" type="button" data-download="${doc.id}">Descargar</button>` : '<button class="btn btn-primary doc-btn" disabled>Sin archivo</button>'}
           ${actions}
         </div>
       `
@@ -117,6 +136,12 @@ function renderDocuments(list) {
   })
   documentsContainer.querySelectorAll('[data-delete]').forEach(btn => {
     btn.addEventListener('click', () => deleteDocument(btn.dataset.delete))
+  })
+  documentsContainer.querySelectorAll('[data-download]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const doc = documents.find(item => String(item.id) === String(btn.dataset.download))
+      if (doc) downloadDocument(doc)
+    })
   })
 }
 

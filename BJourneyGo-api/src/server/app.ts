@@ -14,11 +14,28 @@ export function createApp() {
   const app = express()
 
   app.use(cors())
-  app.use(express.json())
   app.use(morgan('combined'))
+  
+  // Custom body parser that skips multipart/form-data (handled by multer instead)
+  app.use((req, res, next) => {
+    const isMultipart = req.is('multipart/form-data')
+    if (req.method === 'POST' && req.path.includes('upload')) {
+      console.log('[MIDDLEWARE] Upload request:', {
+        path: req.path,
+        method: req.method,
+        contentType: req.get('content-type'),
+        isMultipart
+      })
+    }
+    if (isMultipart) {
+      return next()
+    }
+    express.json()(req, res, next)
+  })
 
   fs.mkdirSync(uploadsDir, { recursive: true })
   app.use('/uploads', express.static(uploadsDir))
+  app.use('/api/uploads', express.static(uploadsDir))
 
   registerStandardRoutes(app)
 
