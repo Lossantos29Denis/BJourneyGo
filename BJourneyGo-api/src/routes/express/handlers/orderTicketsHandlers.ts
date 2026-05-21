@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { query, transaction } from '../../../lib/db'
+import { sendMail } from '../../../lib/mailer'
 import { authenticate } from '../../../server/middleware'
+import { applyTicketTripChange, loadTicketChangeQuote } from '../utils/ticketChange'
 
 function parsePositiveInt(value: any): number {
   const n = Number(value)
@@ -16,7 +18,7 @@ export function registerOrderTicketsHandlers(router: Router) {
 
     try {
       const ticketRows: any = await query(
-        `SELECT t.id, t.uuid, t.trip_id AS tripId, t.status,
+        `SELECT t.id, t.uuid, t.trip_id AS tripId, t.price AS currentPrice, t.status,
                 tr.route_id AS routeId,
                 DATE_FORMAT(tr.departure_at, '%Y-%m-%d %H:%i:%s') AS currentDepartureAt,
                 DATE_FORMAT(tr.arrival_at, '%Y-%m-%d %H:%i:%s') AS currentArrivalAt,
@@ -37,8 +39,9 @@ export function registerOrderTicketsHandlers(router: Router) {
         return res.status(400).json({ error: 'only active tickets can be modified' })
       }
 
-      const daysRaw = Number(req.query?.days || 7)
-      const days = Number.isFinite(daysRaw) ? Math.min(30, Math.max(1, Math.floor(daysRaw))) : 7
+      const daysRaw = req.query?.days === undefined ? undefined : Number(req.query?.days)
+      const hasLimit = typeof daysRaw === 'number' && Number.isFinite(daysRaw) && daysRaw > 0
+      const days = hasLimit ? Math.min(365, Math.max(1, Math.floor(daysRaw))) : 0
 
       const alternatives: any = await query(
         `SELECT tr.id,
@@ -58,11 +61,10 @@ export function registerOrderTicketsHandlers(router: Router) {
            AND NOT (tr.departure_at = ? AND tr.arrival_at <=> ?)
            AND tr.status = 'SCHEDULED'
            AND tr.departure_at >= NOW()
-           AND tr.departure_at <= DATE_ADD(NOW(), INTERVAL ? DAY)
            AND tr.seats_sold < tr.capacity
          ORDER BY tr.departure_at ASC
          LIMIT 200`,
-        [ticket.routeId, ticket.tripId, ticket.currentDepartureAt, ticket.currentArrivalAt, days]
+        hasLimit ? [ticket.routeId, ticket.tripId, ticket.currentDepartureAt, ticket.currentArrivalAt, days] : [ticket.routeId, ticket.tripId, ticket.currentDepartureAt, ticket.currentArrivalAt]
       )
 
       res.json({
@@ -70,6 +72,7 @@ export function registerOrderTicketsHandlers(router: Router) {
           uuid: ticket.uuid,
           tripId: ticket.tripId,
           routeCode: ticket.routeCode,
+          currentPrice: Number(ticket.currentPrice || 0),
           origin: ticket.origin,
           destination: ticket.destination,
           departureAt: ticket.currentDepartureAt,
@@ -92,70 +95,58 @@ export function registerOrderTicketsHandlers(router: Router) {
 
     try {
       const result = await transaction(async (tx: any) => {
-        const [ticketRows]: any = await tx.query(
-          `SELECT t.id, t.uuid, t.trip_id AS tripId, t.status,
-                  o.user_id AS userId,
-                  tr.route_id AS routeId,
-                  tr.departure_at AS oldDepartureAt
-           FROM \`Ticket\` t
-           JOIN \`Order\` o ON o.id = t.order_id
-           JOIN \`Trip\` tr ON tr.id = t.trip_id
-           WHERE t.uuid = ?
-           LIMIT 1`,
-          [ticketUuid]
-        )
-        const ticket = ticketRows && ticketRows[0]
-        if (!ticket) throw new Error('ticket not found')
-        if (Number(ticket.userId) !== Number(userId)) throw new Error('forbidden')
+        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId })
 
-        const ticketStatus = String(ticket.status || '').toUpperCase()
-        if (ticketStatus !== 'ACTIVE') throw new Error('only active tickets can be changed')
+        if (quote.deltaAmount > 0) {
+          return {
+            success: false,
+            requiresPayment: true,
+            deltaAmount: quote.deltaAmount,
+            currency: quote.ticket.currency || 'EUR',
+            currentTrip: {
+              tripId: Number(quote.ticket.tripId),
+              routeCode: quote.ticket.routeCode,
+              origin: quote.ticket.origin,
+              destination: quote.ticket.destination,
+              departureAt: quote.ticket.departureAt || null,
+            },
+            newTrip: {
+              tripId: Number(quote.newTrip.id),
+              routeCode: quote.newTrip.routeCode,
+              origin: quote.newTrip.origin,
+              destination: quote.newTrip.destination,
+              departureAt: quote.newTrip.departureAt,
+              arrivalAt: quote.newTrip.arrivalAt,
+              basePrice: Number(quote.newTrip.basePrice || 0),
+            },
+          }
+        }
 
-        const [newTripRows]: any = await tx.query(
-          `SELECT id, route_id AS routeId, status, capacity, seats_sold AS seatsSold,
-                  DATE_FORMAT(departure_at, '%Y-%m-%d %H:%i:%s') AS departureAt,
-                  DATE_FORMAT(arrival_at, '%Y-%m-%d %H:%i:%s') AS arrivalAt
-           FROM \`Trip\`
-           WHERE id = ?
-           LIMIT 1`,
-          [newTripId]
-        )
-        const newTrip = newTripRows && newTripRows[0]
-        if (!newTrip) throw new Error('new trip not found')
-        if (Number(newTrip.routeId) !== Number(ticket.routeId)) throw new Error('new trip must belong to the same route')
-        if (String(newTrip.status || '').toUpperCase() !== 'SCHEDULED') throw new Error('new trip is not available')
-        if (Number(newTrip.id) === Number(ticket.tripId)) throw new Error('ticket already belongs to this trip')
-        if (Number(newTrip.seatsSold || 0) >= Number(newTrip.capacity || 0)) throw new Error('new trip has no available seats')
-
-        await tx.query(
-          'UPDATE \`Trip\` SET seats_sold = seats_sold - 1 WHERE id = ? AND seats_sold > 0',
-          [Number(ticket.tripId)]
-        )
-
-        const [reserveRows]: any = await tx.query(
-          'UPDATE \`Trip\` SET seats_sold = seats_sold + 1 WHERE id = ? AND seats_sold + 1 <= capacity',
-          [newTripId]
-        )
-        const reserved = (reserveRows && (reserveRows.affectedRows ?? reserveRows.affected_rows ?? 0)) || 0
-        if (reserved === 0) throw new Error('new trip has no available seats')
-
-        const newQrToken = JSON.stringify({ ticketUuid, tripId: Number(newTrip.id) })
-        await tx.query(
-          'UPDATE \`Ticket\` SET trip_id = ?, qr_token = ?, verified_at = NULL, verified_by_id = NULL, verification_count = 0 WHERE id = ?',
-          [Number(newTrip.id), newQrToken, Number(ticket.id)]
-        )
+        const changeResult = await applyTicketTripChange(tx, {
+          ticketId: Number(quote.ticket.id),
+          ticketUuid: String(quote.ticket.uuid || ticketUuid),
+          orderId: Number(quote.ticket.orderId),
+          oldTripId: Number(quote.ticket.tripId),
+          newTripId: Number(quote.newTrip.id),
+          newTripPrice: Number(quote.newTrip.basePrice || 0),
+        })
 
         return {
           success: true,
           ticket: {
             uuid: ticketUuid,
-            tripId: Number(newTrip.id),
-            departureAt: newTrip.departureAt,
-            arrivalAt: newTrip.arrivalAt,
-            qrToken: newQrToken,
+            tripId: Number(quote.newTrip.id),
+            departureAt: quote.newTrip.departureAt,
+            arrivalAt: quote.newTrip.arrivalAt,
+            qrToken: changeResult.qrToken,
+            price: Number(quote.newTrip.basePrice || 0),
           },
         }
       })
+
+      if (result.requiresPayment) {
+        return res.status(409).json(result)
+      }
 
       res.json(result)
     } catch (e: any) {
@@ -227,6 +218,78 @@ export function registerOrderTicketsHandlers(router: Router) {
       if (message === 'forbidden') return res.status(403).json({ error: message })
       if (message.includes('not found')) return res.status(404).json({ error: message })
       return res.status(400).json({ error: message })
+    }
+  })
+
+  router.post('/tickets/:uuid/refund-request', authenticate, async (req: any, res) => {
+    const ticketUuid = String(req.params.uuid || '').trim()
+    const userId = req.user?.userId
+    const reason = String(req.body?.reason || '').trim()
+    const notes = String(req.body?.notes || '').trim()
+
+    if (!userId) return res.status(401).json({ error: 'unauthorized' })
+    if (!ticketUuid) return res.status(400).json({ error: 'uuid required' })
+    if (!reason) return res.status(400).json({ error: 'reason required' })
+
+    try {
+      const [rows]: any = await query(
+        `SELECT t.id, t.uuid, t.status, t.price, t.passenger_name AS passengerName,
+                o.id AS orderId, o.reference_code AS referenceCode, o.contact_email AS contactEmail, o.contact_phone AS contactPhone,
+                u.name AS userName, u.email AS userEmail,
+                tr.departure_at AS departureAt, tr.arrival_at AS arrivalAt,
+                r.origin, r.destination, r.code AS routeCode,
+                a.name AS agencyName, a.contact_email AS agencyEmail
+         FROM \`Ticket\` t
+         JOIN \`Order\` o ON o.id = t.order_id
+         JOIN \`User\` u ON u.id = o.user_id
+         JOIN \`Trip\` tr ON tr.id = t.trip_id
+         JOIN \`Route\` r ON r.id = tr.route_id
+         LEFT JOIN \`Agency\` a ON a.id = r.agency_id
+         WHERE t.uuid = ? AND o.user_id = ?
+         LIMIT 1`,
+        [ticketUuid, userId]
+      )
+
+      const ticket = rows && rows[0]
+      if (!ticket) return res.status(404).json({ error: 'ticket not found' })
+
+      const messageTitle = `Solicitud de reembolso asistido - ${ticket.referenceCode || ticket.uuid}`
+      const messageText = [
+        `Ticket: ${ticket.uuid}`,
+        `Referencia: ${ticket.referenceCode || '—'}`,
+        `Cliente: ${ticket.userName || '—'} (${ticket.userEmail || '—'})`,
+        `Ruta: ${ticket.origin || '—'} -> ${ticket.destination || '—'}`,
+        `Salida: ${ticket.departureAt || '—'}`,
+        `Llegada: ${ticket.arrivalAt || '—'}`,
+        `Agencia: ${ticket.agencyName || '—'}`,
+        `Motivo: ${reason}`,
+        notes ? `Notas: ${notes}` : null,
+        '',
+        'El cliente solicita revisión supervisada por la agencia y el equipo técnico para completar el reembolso si procede.'
+      ].filter(Boolean).join('\n')
+
+      const emailTargets = Array.from(new Set([
+        process.env.SUPPORT_EMAIL || process.env.CONTACT_EMAIL || 'support@bjourneygo.me',
+        String(ticket.agencyEmail || '').trim(),
+      ].filter(Boolean)))
+
+      await sendMail({
+        to: emailTargets,
+        subject: `[Web] ${messageTitle}`,
+        text: messageText,
+        html: messageText.replace(/\n/g, '<br/>'),
+      })
+
+      return res.json({
+        success: true,
+        recipients: emailTargets,
+        request: {
+          ticketUuid,
+          reason,
+        },
+      })
+    } catch (e: any) {
+      return res.status(500).json({ error: String(e.message || e) })
     }
   })
 }

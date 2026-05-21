@@ -21,8 +21,8 @@ import '../styles/comprar.css';
           </div>
           <div class="field"><label for="from">Origen</label><input id="from" name="from" type="text" placeholder="Ej. Madrid" required aria-required="true" minlength="2" aria-label="Ciudad de origen"/></div>
           <div class="field"><label for="to">Destino</label><input id="to" name="to" type="text" placeholder="Ej. Barcelona" required aria-required="true" minlength="2" aria-label="Ciudad de destino"/></div>
-          <div class="field"><label for="date">Fecha ida</label><input id="date" name="date" type="date" required aria-required="true" aria-label="Fecha ida"/></div>
-          <div class="field" id="returnDateField"><label for="returnDate">Fecha vuelta</label><input id="returnDate" name="returnDate" type="date" aria-label="Fecha vuelta"/></div>
+          <div class="field"><label for="date">Desde</label><input id="date" name="date" type="date" required aria-required="true" aria-label="Fecha inicio de búsqueda"/></div>
+          <div class="field"><label for="endDate">Hasta</label><input id="endDate" name="endDate" type="date" required aria-required="true" aria-label="Fecha fin de búsqueda"/></div>
           <div class="field"><label for="passengers">Personas</label><input id="passengers" name="passengers" type="number" min="1" step="1" value="1" required aria-required="true" aria-label="Cantidad de personas"/></div>
           <div class="actions"><button type="submit" class="btn btn--primary">Buscar</button></div>
         </form>

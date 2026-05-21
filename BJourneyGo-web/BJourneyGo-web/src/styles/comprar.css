@@ -43,7 +43,7 @@
 
 .search-form {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1rem;
   align-items: end;
   max-width: 980px;
@@ -51,7 +51,7 @@
 }
 
 .search-form .actions {
-  grid-column: span 5;
+  grid-column: span 6;
   display: flex;
   gap: .75rem;
   justify-content: center;

@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { query, transaction } from '../../../lib/db'
 import { appendCheckoutSessionId, buildOrderSummary, extractOptionalUserId, normalizePassengers, resolveCheckoutReturnUrl, resolveTripIds } from '../utils/paymentUtils'
 import { processPaymentCapture } from './paymentProcessingHandlers'
+import { loadTicketChangeQuote } from '../utils/ticketChange'
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || ''
 const STRIPE_SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || ''
@@ -171,6 +172,109 @@ export function registerStripePaymentHandlers(router: any) {
     }
   })
 
+  router.post('/stripe/change-trip-checkout', async (req: any, res: any) => {
+    const userId = extractOptionalUserId(req)
+    const ticketUuid = String(req.body?.ticketUuid || '').trim()
+    const newTripId = Number(req.body?.newTripId || 0)
+    const rawSuccessUrl = String(req.body?.successUrl || '').trim()
+    const rawCancelUrl = String(req.body?.cancelUrl || '').trim()
+
+    if (!stripe) return res.status(500).json({ error: 'stripe not configured' })
+    if (!STRIPE_SUCCESS_URL || !STRIPE_CANCEL_URL) return res.status(500).json({ error: 'stripe urls not configured' })
+    if (!userId) return res.status(401).json({ error: 'unauthorized' })
+    if (!ticketUuid) return res.status(400).json({ error: 'ticketUuid required' })
+    if (!Number.isInteger(newTripId) || newTripId <= 0) return res.status(400).json({ error: 'newTripId required' })
+
+    const successUrl = resolveCheckoutReturnUrl(rawSuccessUrl, STRIPE_SUCCESS_URL)
+    const cancelUrl = resolveCheckoutReturnUrl(rawCancelUrl, STRIPE_CANCEL_URL)
+
+    try {
+      const result = await transaction(async (tx: any) => {
+        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId })
+        if (quote.deltaAmount <= 0) throw new Error('no payment required for this change')
+
+        const amount = Math.round(quote.deltaAmount * 100)
+        const currency = String(quote.ticket.currency || STRIPE_CURRENCY || 'EUR').toLowerCase()
+        const commissionPercentRaw = Number.isFinite(Number(quote.newTrip.commissionPercent))
+          ? Number(quote.newTrip.commissionPercent)
+          : COMMISSION_DEFAULT_PERCENT
+        const commissionPercent = Math.min(100, Math.max(0, commissionPercentRaw))
+        const feeCents = Math.max(0, Math.min(amount, Math.round(amount * (commissionPercent / 100))))
+        const hasDestination = Boolean(quote.newTrip.agencyStripeAccountId && quote.newTrip.payoutActive)
+
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment',
+          payment_method_types: ['card'],
+          line_items: [{
+            quantity: 1,
+            price_data: {
+              currency,
+              unit_amount: amount,
+              product_data: {
+                name: `Cambio de viaje ${quote.ticket.origin} - ${quote.ticket.destination}`,
+                description: `Nuevo viaje ${quote.newTrip.routeCode || ''} · ${quote.newTrip.departureAt || ''}`,
+              }
+            }
+          }],
+          success_url: appendCheckoutSessionId(successUrl),
+          cancel_url: appendCheckoutSessionId(cancelUrl),
+          ...(hasDestination ? {
+            payment_intent_data: {
+              application_fee_amount: feeCents,
+              transfer_data: {
+                destination: quote.newTrip.agencyStripeAccountId,
+              }
+            }
+          } : {}),
+          metadata: {
+            orderId: String(quote.ticket.orderId),
+            userId: userId ? String(userId) : '',
+            tripId: String(newTripId),
+            changeTicketUuid: String(ticketUuid),
+            changeOldTripId: String(quote.ticket.tripId),
+            changeNewTripId: String(newTripId),
+            amountDelta: String(quote.deltaAmount),
+            quantity: '1',
+            tripType: 'CHANGE',
+          }
+        })
+
+        await query(
+          'INSERT INTO `PaymentRecord` (order_id, provider, provider_ref, amount, currency, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
+          [quote.ticket.orderId, 'stripe', session.id, quote.deltaAmount, quote.ticket.currency || STRIPE_CURRENCY || 'EUR', 'PENDING']
+        )
+
+        return {
+          success: true,
+          url: session.url,
+          sessionId: session.id,
+          deltaAmount: quote.deltaAmount,
+          currency: quote.ticket.currency || STRIPE_CURRENCY || 'EUR',
+          currentTrip: {
+            tripId: Number(quote.ticket.tripId),
+            routeCode: quote.ticket.routeCode,
+            origin: quote.ticket.origin,
+            destination: quote.ticket.destination,
+            departureAt: quote.ticket.departureAt || null,
+          },
+          newTrip: {
+            tripId: Number(quote.newTrip.id),
+            routeCode: quote.newTrip.routeCode,
+            origin: quote.newTrip.origin,
+            destination: quote.newTrip.destination,
+            departureAt: quote.newTrip.departureAt,
+            arrivalAt: quote.newTrip.arrivalAt,
+            basePrice: Number(quote.newTrip.basePrice || 0),
+          },
+        }
+      })
+
+      res.json(result)
+    } catch (e: any) {
+      res.status(400).json({ error: String(e.message || e) })
+    }
+  })
+
   router.post('/stripe/confirm', async (req: any, res: any) => {
     const { sessionId } = req.body || {}
     if (!stripe) return res.status(500).json({ error: 'stripe not configured' })
@@ -188,6 +292,9 @@ export function registerStripePaymentHandlers(router: any) {
       const tripId = Number(session.metadata?.tripId || 0)
       const outboundTripId = Number(session.metadata?.outboundTripId || tripId || 0)
       const returnTripId = Number(session.metadata?.returnTripId || 0)
+      const changeTicketUuid = String(session.metadata?.changeTicketUuid || '').trim()
+      const changeOldTripId = Number(session.metadata?.changeOldTripId || 0)
+      const changeNewTripId = Number(session.metadata?.changeNewTripId || tripId || 0)
       const quantity = Number(session.metadata?.quantity || 0)
 
       const amount = session.amount_total ? session.amount_total / 100 : 0
@@ -202,6 +309,9 @@ export function registerStripePaymentHandlers(router: any) {
         tripId,
         outboundTripId,
         returnTripId,
+        changeTicketUuid,
+        changeOldTripId,
+        changeNewTripId,
         quantity
       })
       const purchase = await buildOrderSummary(orderId)

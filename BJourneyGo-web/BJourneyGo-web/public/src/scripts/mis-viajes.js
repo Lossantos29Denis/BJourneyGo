@@ -60,6 +60,7 @@ function ticketsHtml(tickets) {
     const route = `${t.origin || ''}  →  ${t.destination || ''}`
     const canDownloadPdf = Boolean(t.uuid)
     const canDownloadQr = Boolean(t.qrToken)
+    const canChangeTrip = Boolean(t.uuid) && String(t.status || '').toUpperCase() === 'ACTIVE'
     return `
       <article class="ticket-item">
         <div class="ticket-info">
@@ -72,6 +73,7 @@ function ticketsHtml(tickets) {
           <p><strong>Estado:</strong> ${statusBadge(t.status)}</p>
           ${canDownloadPdf ? `<button class="btn-download-pdf" data-ticket-uuid="${esc(t.uuid)}" title="Descargar billete en PDF">⬇ Descargar PDF</button>` : ''}
           ${canDownloadQr ? `<button class="btn-download-qr" data-qr-token="${esc(t.qrToken)}" data-ticket-name="${esc(name)}" title="Descargar imagen QR">⬇ Descargar QR</button>` : ''}
+          ${canChangeTrip ? `<div class="ticket-actions"><button type="button" class="btn-change-trip" data-ticket-uuid="${esc(t.uuid)}">Cambiar viaje</button><span class="ticket-change-hint">Se abre una ventana completa para elegir otro viaje y revisar diferencias de precio.</span></div>` : ''}
         </div>
         <div class="ticket-qr">
           ${t.qrToken
@@ -80,6 +82,12 @@ function ticketsHtml(tickets) {
         </div>
       </article>`
   }).join('')
+}
+
+function openTripChangePage(ticketUuid) {
+  const route = `/mis-viajes/cambiar/${encodeURIComponent(ticketUuid)}`
+  const popup = window.open(route, '_blank', 'noopener,noreferrer')
+  if (!popup) window.location.href = route
 }
 
 async function downloadTicketPdf(uuid) {
@@ -172,6 +180,8 @@ if (token) {
         if (dlBtn) { downloadTicketPdf(dlBtn.dataset.ticketUuid); return }
         const qrBtn = e.target.closest('.btn-download-qr')
         if (qrBtn) { downloadQrImage(qrBtn.dataset.qrToken, qrBtn.dataset.ticketName); return }
+        const changeBtn = e.target.closest('.btn-change-trip')
+        if (changeBtn) { openTripChangePage(changeBtn.dataset.ticketUuid); return }
         const btn = e.target.closest('.order-header')
         if (btn) toggleOrder(btn)
       })

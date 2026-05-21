@@ -1,0 +1,64 @@
+---
+import Layout from '../../../layouts/Layout.astro'
+import '../../../styles/cambiar-viaje.css'
+
+const ticketUuid = String(Astro.params.uuid || '').trim()
+---
+
+<Layout title="Cambiar viaje — BJourneyGo" description="Cambiar un billete por otro viaje disponible">
+  <main class="change-trip-page container">
+    <section class="change-trip-hero">
+      <div>
+        <p class="eyebrow">Mis Viajes</p>
+        <h1>Cambiar viaje</h1>
+      </div>
+      <a class="back-link" href="/mis-viajes">Volver a Mis Viajes</a>
+    </section>
+
+    <section id="changeTripApp" class="change-trip-shell" data-ticket-uuid={ticketUuid} aria-live="polite">
+      <div class="change-state" id="changeState">Cargando información del billete…</div>
+      <div class="change-layout">
+        <article class="change-panel current-panel">
+          <h2>Tu billete actual</h2>
+          <div id="currentTicketCard" class="ticket-card empty-card"></div>
+          <div class="ticket-actions-panel">
+            <button type="button" id="cancelTicketBtn" class="btn btn--ghost danger-btn">Cancelar billete</button>
+
+            <form id="refundRequestForm" class="refund-form" novalidate>
+              <h3>Solicitar reembolso asistido</h3>
+              <p class="refund-note">
+                Esta solicitud queda supervisada por la agencia y por el equipo técnico. El reembolso no se completa automáticamente.
+              </p>
+              <label>
+                Motivo
+                <select id="refundReason" name="refundReason" required>
+                  <option value="">Selecciona un motivo</option>
+                  <option value="Cambio de planes">Cambio de planes</option>
+                  <option value="Error en la reserva">Error en la reserva</option>
+                  <option value="Incidencia operativa">Incidencia operativa</option>
+                  <option value="Motivo médico">Motivo médico</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </label>
+              <label>
+                Detalles
+                <textarea id="refundNotes" name="refundNotes" rows="4" placeholder="Explica brevemente la situación y cualquier dato útil para la revisión"></textarea>
+              </label>
+              <button type="submit" id="refundSubmitBtn" class="btn btn--primary">Enviar solicitud de reembolso</button>
+            </form>
+          </div>
+        </article>
+
+        <article class="change-panel alternatives-panel">
+          <div class="panel-header">
+            <h2>Viajes disponibles</h2>
+            <p id="alternativesCount" class="panel-hint"></p>
+          </div>
+          <div id="alternativesList" class="alternatives-list"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/scripts/cambiar-viaje.js"></script>
+</Layout>

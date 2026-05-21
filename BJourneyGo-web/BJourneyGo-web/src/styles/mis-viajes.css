@@ -118,6 +118,7 @@
   grid-template-columns: 1fr 180px;
   gap: .75rem;
   background: rgba(255,255,255,0.8);
+  align-items: start;
 }
 
 .ticket-item h4 {
@@ -140,6 +141,121 @@
   border-radius: 10px;
   border: 1px solid var(--border);
   background: #fff;
+}
+
+.ticket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .6rem;
+}
+
+.ticket-change-hint {
+  color: var(--text-muted);
+  font-size: .82rem;
+  line-height: 1.3;
+}
+
+.btn-change-trip,
+.btn-change-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  padding: .38rem .85rem;
+  border: 1px solid var(--primary, #6366f1);
+  border-radius: 8px;
+  background: var(--primary, #6366f1);
+  color: #fff;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease, background .15s ease;
+}
+
+.btn-change-trip:hover,
+.btn-change-select:hover {
+  transform: translateY(-1px);
+}
+
+.btn-change-trip:disabled,
+.btn-change-select:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.ticket-change-panel {
+  grid-column: 1 / -1;
+  margin-top: .25rem;
+  border-top: 1px dashed var(--border);
+  padding-top: .85rem;
+}
+
+.ticket-change-panel.is-hidden {
+  display: none;
+}
+
+.change-loading,
+.change-empty,
+.change-error,
+.change-success {
+  padding: .75rem .85rem;
+  border-radius: 10px;
+  font-size: .92rem;
+}
+
+.change-loading,
+.change-empty {
+  background: rgba(99,102,241,.08);
+  color: var(--text-muted);
+}
+
+.change-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.change-success {
+  background: #ecfdf5;
+  color: #15803d;
+}
+
+.change-summary {
+  display: grid;
+  gap: .25rem;
+  margin-bottom: .75rem;
+  color: var(--text);
+}
+
+.change-note {
+  margin: .35rem 0 0;
+  color: var(--text-muted);
+  font-size: .88rem;
+}
+
+.change-options {
+  display: grid;
+  gap: .65rem;
+}
+
+.change-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .75rem;
+  align-items: center;
+  padding: .75rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.change-option-info {
+  display: grid;
+  gap: .18rem;
+  font-size: .92rem;
+}
+
+.change-option-info span {
+  color: var(--text-muted);
 }
 
 .qr-empty {
@@ -176,6 +292,14 @@
   }
 
   .ticket-item {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-change-panel {
+    grid-column: auto;
+  }
+
+  .change-option {
     grid-template-columns: 1fr;
   }
 }

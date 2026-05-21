@@ -5,6 +5,7 @@ import { query, transaction } from '../../../lib/db'
 import { buildReceiptEmail } from '../../../lib/emailTemplates'
 import mailer from '../../../lib/mailer'
 import { extractOptionalUserId, normalizePassengers, resolveTripIds } from '../utils/paymentUtils'
+import { applyTicketTripChange, loadTicketChangeQuote } from '../utils/ticketChange'
 
 const PAYMENT_WEBHOOK_SECRET = process.env.PAYMENT_WEBHOOK_SECRET || ''
 
@@ -18,8 +19,8 @@ function generateReferenceCode(length = 10): string {
   return `BJ-${code}`
 }
 
-export async function processPaymentCapture(params: { provider: string; providerRef: string; status: string; amount: number; currency: string; orderId?: number; tripId?: number; outboundTripId?: number; returnTripId?: number; quantity?: number }) {
-  const { provider, providerRef, status, amount, currency, orderId, tripId, outboundTripId, returnTripId, quantity } = params
+export async function processPaymentCapture(params: { provider: string; providerRef: string; status: string; amount: number; currency: string; orderId?: number; tripId?: number; outboundTripId?: number; returnTripId?: number; quantity?: number; changeTicketUuid?: string; changeOldTripId?: number; changeNewTripId?: number }) {
+  const { provider, providerRef, status, amount, currency, orderId, tripId, outboundTripId, returnTripId, quantity, changeTicketUuid, changeOldTripId, changeNewTripId } = params
   return transaction(async (tx: any) => {
     const [paymentRows]: any = await tx.query(
       'SELECT id, order_id AS orderId, provider, provider_ref AS providerRef, provider_ref AS providerRefDup, amount, currency, fee, status, created_at AS createdAt, updated_at AS updatedAt, captured_at AS capturedAt, refunded_at AS refundedAt FROM `PaymentRecord` WHERE provider_ref = ? LIMIT 1',
@@ -42,6 +43,54 @@ export async function processPaymentCapture(params: { provider: string; provider
         'UPDATE `PaymentRecord` SET status = ?, amount = ?, currency = ?, updated_at = NOW() WHERE id = ?',
         [status, amount ? Number(amount) : payment.amount, currency || payment.currency, payment.id]
       )
+    }
+
+    if (status === 'CAPTURED' && orderId && changeTicketUuid && changeNewTripId) {
+      const [changeResult] = await tx.query(
+        `SELECT t.id, t.uuid, t.trip_id AS tripId, t.price AS currentPrice, t.status,
+                o.user_id AS userId, o.currency AS currency,
+                tr.route_id AS routeId
+         FROM \`Ticket\` t
+         JOIN \`Order\` o ON o.id = t.order_id
+         JOIN \`Trip\` tr ON tr.id = t.trip_id
+         WHERE t.uuid = ? AND o.id = ?
+         LIMIT 1`,
+        [changeTicketUuid, orderId]
+      )
+      const ticket = changeResult && changeResult[0]
+      if (!ticket) throw new Error('ticket not found for change')
+
+      const quote = await loadTicketChangeQuote(tx, { ticketUuid: changeTicketUuid, newTripId: Number(changeNewTripId), orderId })
+      if (quote.deltaAmount <= 0) throw new Error('payment not required for this change')
+      if (Number(changeOldTripId || 0) && Number(changeOldTripId) !== Number(quote.ticket.tripId)) {
+        throw new Error('change metadata is inconsistent')
+      }
+
+      await applyTicketTripChange(tx, {
+        ticketId: Number(quote.ticket.id),
+        ticketUuid: String(changeTicketUuid),
+        orderId: Number(orderId),
+        oldTripId: Number(quote.ticket.tripId),
+        newTripId: Number(quote.newTrip.id),
+        newTripPrice: Number(quote.newTrip.basePrice || 0),
+        updateOrderTotal: true,
+        orderTotalDelta: Number(quote.deltaAmount),
+      })
+
+      await tx.query('UPDATE `Order` SET status = ? WHERE id = ?', ['PAID', Number(orderId)])
+
+      return {
+        ok: true,
+        payment,
+        changeApplied: true,
+        change: {
+          ticketUuid: changeTicketUuid,
+          tripId: Number(quote.newTrip.id),
+          departureAt: quote.newTrip.departureAt,
+          arrivalAt: quote.newTrip.arrivalAt,
+          deltaAmount: quote.deltaAmount,
+        },
+      }
     }
 
     if (status === 'CAPTURED' && orderId) {

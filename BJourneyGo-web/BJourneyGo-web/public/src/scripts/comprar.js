@@ -41,7 +41,8 @@ const modalDesc = document.getElementById('modalDesc');
 const modalActionCloseBtn = document.getElementById('modalActionCloseBtn');
 const modalChooseBtn = document.getElementById('modalChooseBtn');
 const tripTypeEl = document.getElementById('tripType');
-const returnDateField = document.getElementById('returnDateField');
+const startDateInput = document.getElementById('date');
+const endDateInput = document.getElementById('endDate');
 
 let tripIndex = new Map();
 let selectedTripId = null;
@@ -55,6 +56,18 @@ function getPassengerCount() {
   const count = parseInt(raw, 10)
   if (!Number.isFinite(count) || count <= 0) return 1
   return count
+}
+
+function syncDateBounds() {
+  const startDate = String(startDateInput?.value || '')
+  const endDate = String(endDateInput?.value || '')
+
+  if (endDateInput) {
+    endDateInput.min = startDate || ''
+    if (startDate && (!endDate || endDate < startDate)) {
+      endDateInput.value = startDate
+    }
+  }
 }
 
 function openPassengerInfo(tripId, triggerBtn, returnTripId = null) {
@@ -175,7 +188,6 @@ function renderTickets(tickets) {
       if (bookingType === 'ROUNDTRIP' && selectingLeg === 'outbound') {
         const from = document.getElementById('from').value.trim()
         const to = document.getElementById('to').value.trim()
-        const returnDate = returnDateInput?.value || ''
         selectedOutboundTrip = tripIndex.get(String(id)) || null
         if (!selectedOutboundTrip) return
 
@@ -183,9 +195,7 @@ function renderTickets(tickets) {
           btn.setAttribute('disabled', 'true')
           apiTickets = await fetchTrips({
             origin: to,
-            destination: from,
-            startDate: returnDate,
-            endDate: returnDate
+            destination: from
           })
           selectingLeg = 'return'
           hasSearched = true
@@ -257,20 +267,9 @@ async function fetchTrips(params = {}) {
 if (resultsPanel) resultsPanel.classList.add('is-hidden')
 
 const form = document.getElementById('searchForm');
-const returnDateInput = document.getElementById('returnDate');
 
 function syncTripTypeUI() {
   bookingType = String(tripTypeEl?.value || 'ONEWAY').toUpperCase()
-  if (bookingType === 'ROUNDTRIP') {
-    returnDateField?.classList.remove('is-hidden')
-    if (returnDateInput) returnDateInput.required = true
-  } else {
-    returnDateField?.classList.add('is-hidden')
-    if (returnDateInput) {
-      returnDateInput.required = false
-      returnDateInput.value = ''
-    }
-  }
 }
 
 tripTypeEl?.addEventListener('change', syncTripTypeUI)
@@ -320,8 +319,8 @@ async function submitSearch(e) {
   if (e) e.preventDefault();
   const from = document.getElementById('from').value.trim();
   const to = document.getElementById('to').value.trim();
-  const date = document.getElementById('date').value;
-  const returnDate = returnDateInput?.value || '';
+  const startDate = String(startDateInput?.value || '')
+  const endDate = String(endDateInput?.value || startDate)
   bookingType = String(tripTypeEl?.value || 'ONEWAY').toUpperCase()
   selectingLeg = 'outbound'
   selectedOutboundTrip = null
@@ -330,25 +329,22 @@ async function submitSearch(e) {
     alert('Debes completar origen y destino para buscar.')
     return
   }
-  if (bookingType === 'ROUNDTRIP' && !date) {
-    alert('Debes indicar la fecha de ida para ida y vuelta.')
+  if (!startDate) {
+    alert('Debes indicar la fecha de inicio de búsqueda.')
     return
   }
-  if (bookingType === 'ROUNDTRIP' && !returnDate) {
-    alert('Debes indicar la fecha de vuelta para ida y vuelta.')
+  if (!endDate) {
+    alert('Debes indicar la fecha fin de búsqueda.')
     return
   }
-  if (bookingType === 'ROUNDTRIP' && returnDate < date) {
+  if (endDate < startDate) {
     alert('La fecha fin no puede ser menor que la fecha inicio.')
     return
   }
-
   try {
     const searchParams = { origin: from, destination: to }
-    if (date) {
-      searchParams.startDate = date
-      searchParams.endDate = date
-    }
+    searchParams.startDate = startDate
+    searchParams.endDate = endDate
     apiTickets = await fetchTrips(searchParams)
     hasSearched = true
     applyClientFilters()
@@ -381,15 +377,9 @@ document.getElementById('passengers')?.addEventListener('input', () => {
   debounceTimer = setTimeout(() => applyClientFilters(), 250)
 })
 
-document.getElementById('date')?.addEventListener('change', () => {
-  const dateVal = document.getElementById('date').value
-  if (returnDateInput) {
-    returnDateInput.min = dateVal || ''
-    if (returnDateInput.value && dateVal && returnDateInput.value < dateVal) {
-      returnDateInput.value = dateVal
-    }
-  }
-})
+startDateInput?.addEventListener('change', syncDateBounds)
+endDateInput?.addEventListener('change', syncDateBounds)
+syncDateBounds()
 
 ['filterMinPrice','filterMaxPrice','filterSeats','filterTimeFrom','filterTimeTo','sortBy'].forEach(id => {
   const el = document.getElementById(id)
