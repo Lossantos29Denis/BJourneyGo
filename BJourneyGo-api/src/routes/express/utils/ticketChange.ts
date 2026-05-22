@@ -15,8 +15,8 @@ function toNumber(value: any): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export async function loadTicketChangeQuote(tx: TxLike, params: { ticketUuid: string; newTripId: number; orderId?: number | null; userId?: number | null }): Promise<TicketChangeQuote> {
-  const { ticketUuid, newTripId, orderId, userId } = params
+export async function loadTicketChangeQuote(tx: TxLike, params: { ticketUuid: string; newTripId: number; orderId?: number | null; userId?: number | null; requesterEmail?: string | null }): Promise<TicketChangeQuote> {
+  const { ticketUuid, newTripId, orderId, userId, requesterEmail } = params
   const ticketConditions: string[] = ['t.uuid = ?']
   const ticketParams: any[] = [ticketUuid]
   if (orderId) {
@@ -25,8 +25,8 @@ export async function loadTicketChangeQuote(tx: TxLike, params: { ticketUuid: st
   }
 
   const [ticketRows]: any = await tx.query(
-    `SELECT t.id, t.uuid, t.order_id AS orderId, t.trip_id AS tripId, t.price AS currentPrice, t.status,
-            o.user_id AS userId, o.currency AS currency,
+      `SELECT t.id, t.uuid, t.order_id AS orderId, t.trip_id AS tripId, t.price AS currentPrice, t.status,
+        o.user_id AS userId, o.contact_email AS contactEmail, o.currency AS currency,
             tr.route_id AS routeId,
             r.origin, r.destination, r.code AS routeCode
      FROM \`Ticket\` t
@@ -39,7 +39,11 @@ export async function loadTicketChangeQuote(tx: TxLike, params: { ticketUuid: st
   )
   const ticket = ticketRows && ticketRows[0]
   if (!ticket) throw new Error('ticket not found')
-  if (userId !== undefined && userId !== null && Number(ticket.userId) !== Number(userId)) throw new Error('forbidden')
+  const normalizedEmail = String(requesterEmail || '').trim().toLowerCase()
+  const contactEmail = String(ticket.contactEmail || '').trim().toLowerCase()
+  if (userId !== undefined && userId !== null && Number(ticket.userId) !== Number(userId)) {
+    if (!normalizedEmail || normalizedEmail !== contactEmail) throw new Error('forbidden')
+  }
 
   const ticketStatus = String(ticket.status || '').toUpperCase()
   if (ticketStatus !== 'ACTIVE') throw new Error('only active tickets can be modified')

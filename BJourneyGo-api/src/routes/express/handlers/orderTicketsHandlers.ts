@@ -9,10 +9,17 @@ function parsePositiveInt(value: any): number {
   return Number.isInteger(n) && n > 0 ? n : 0
 }
 
+async function getRequesterEmail(userId: any): Promise<string> {
+  if (!userId) return ''
+  const rows: any = await query('SELECT email FROM `User` WHERE id = ? LIMIT 1', [Number(userId)])
+  return String(rows?.[0]?.email || '').trim().toLowerCase()
+}
+
 export function registerOrderTicketsHandlers(router: Router) {
   router.get('/tickets/:uuid/alternatives', authenticate, async (req: any, res) => {
     const ticketUuid = String(req.params.uuid || '').trim()
     const userId = req.user?.userId
+    const requesterEmail = await getRequesterEmail(userId)
     if (!userId) return res.status(401).json({ error: 'unauthorized' })
     if (!ticketUuid) return res.status(400).json({ error: 'uuid required' })
 
@@ -27,9 +34,9 @@ export function registerOrderTicketsHandlers(router: Router) {
          JOIN \`Order\` o ON o.id = t.order_id
          JOIN \`Trip\` tr ON tr.id = t.trip_id
          JOIN \`Route\` r ON r.id = tr.route_id
-         WHERE t.uuid = ? AND o.user_id = ?
+         WHERE t.uuid = ? AND (o.user_id = ? OR LOWER(COALESCE(o.contact_email, '')) = ?)
          LIMIT 1`,
-        [ticketUuid, userId]
+        [ticketUuid, userId, requesterEmail]
       )
       const ticket = ticketRows && ticketRows[0]
       if (!ticket) return res.status(404).json({ error: 'ticket not found' })
@@ -89,13 +96,14 @@ export function registerOrderTicketsHandlers(router: Router) {
     const ticketUuid = String(req.params.uuid || '').trim()
     const newTripId = parsePositiveInt(req.body?.newTripId)
     const userId = req.user?.userId
+    const requesterEmail = await getRequesterEmail(userId)
     if (!userId) return res.status(401).json({ error: 'unauthorized' })
     if (!ticketUuid) return res.status(400).json({ error: 'uuid required' })
     if (!newTripId) return res.status(400).json({ error: 'newTripId required' })
 
     try {
       const result = await transaction(async (tx: any) => {
-        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId })
+        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId, requesterEmail })
 
         if (quote.deltaAmount > 0) {
           return {
@@ -160,6 +168,7 @@ export function registerOrderTicketsHandlers(router: Router) {
   router.post('/tickets/:uuid/cancel', authenticate, async (req: any, res) => {
     const ticketUuid = String(req.params.uuid || '').trim()
     const userId = req.user?.userId
+    const requesterEmail = await getRequesterEmail(userId)
     if (!userId) return res.status(401).json({ error: 'unauthorized' })
     if (!ticketUuid) return res.status(400).json({ error: 'uuid required' })
 
@@ -167,7 +176,7 @@ export function registerOrderTicketsHandlers(router: Router) {
       const result = await transaction(async (tx: any) => {
         const [ticketRows]: any = await tx.query(
           `SELECT t.id, t.uuid, t.trip_id AS tripId, t.order_id AS orderId, t.status,
-                  o.user_id AS userId
+                  o.user_id AS userId, o.contact_email AS contactEmail
            FROM \`Ticket\` t
            JOIN \`Order\` o ON o.id = t.order_id
            WHERE t.uuid = ?
@@ -176,7 +185,7 @@ export function registerOrderTicketsHandlers(router: Router) {
         )
         const ticket = ticketRows && ticketRows[0]
         if (!ticket) throw new Error('ticket not found')
-        if (Number(ticket.userId) !== Number(userId)) throw new Error('forbidden')
+        if (Number(ticket.userId) !== Number(userId) && String(ticket.contactEmail || '').trim().toLowerCase() !== requesterEmail) throw new Error('forbidden')
 
         const ticketStatus = String(ticket.status || '').toUpperCase()
         if (ticketStatus !== 'ACTIVE') throw new Error('only active tickets can be cancelled')
@@ -224,6 +233,7 @@ export function registerOrderTicketsHandlers(router: Router) {
   router.post('/tickets/:uuid/refund-request', authenticate, async (req: any, res) => {
     const ticketUuid = String(req.params.uuid || '').trim()
     const userId = req.user?.userId
+    const requesterEmail = await getRequesterEmail(userId)
     const reason = String(req.body?.reason || '').trim()
     const notes = String(req.body?.notes || '').trim()
 
@@ -245,9 +255,9 @@ export function registerOrderTicketsHandlers(router: Router) {
          JOIN \`Trip\` tr ON tr.id = t.trip_id
          JOIN \`Route\` r ON r.id = tr.route_id
          LEFT JOIN \`Agency\` a ON a.id = r.agency_id
-         WHERE t.uuid = ? AND o.user_id = ?
+         WHERE t.uuid = ? AND (o.user_id = ? OR LOWER(COALESCE(o.contact_email, '')) = ?)
          LIMIT 1`,
-        [ticketUuid, userId]
+        [ticketUuid, userId, requesterEmail]
       )
 
       const ticket = rows && rows[0]

@@ -189,8 +189,10 @@ export function registerStripePaymentHandlers(router: any) {
     const cancelUrl = resolveCheckoutReturnUrl(rawCancelUrl, STRIPE_CANCEL_URL)
 
     try {
+      const userRows: any = userId ? await query('SELECT email FROM `User` WHERE id = ? LIMIT 1', [Number(userId)]) : []
+      const requesterEmail = String(userRows?.[0]?.email || '').trim().toLowerCase()
       const result = await transaction(async (tx: any) => {
-        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId })
+        const quote = await loadTicketChangeQuote(tx, { ticketUuid, newTripId, userId, requesterEmail })
         if (quote.deltaAmount <= 0) throw new Error('no payment required for this change')
 
         const amount = Math.round(quote.deltaAmount * 100)

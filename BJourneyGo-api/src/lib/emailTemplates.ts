@@ -96,23 +96,23 @@ export function buildVerifyEmail(verifyLink: string) {
 }
 
 export function buildResetEmail(resetLink: string) {
-  const title = 'Restablece tu contrasena'
-  const preheader = 'Usa el enlace para cambiar tu contrasena.'
+  const title = 'Restablece tu contraseña'
+  const preheader = 'Usa el enlace para cambiar tu contraseña.'
   const bodyHtml = `
-    <p>Recibimos una solicitud para restablecer tu contrasena.</p>
+    <p>Recibimos una solicitud para restablecer tu contraseña.</p>
     <p>Si fuiste tu, usa el siguiente enlace:</p>
     <p style="word-break:break-all;color:#555;">${resetLink}</p>
   `.trim()
-  const bodyText = `Restablece tu contrasena usando este enlace: ${resetLink}`
+  const bodyText = `Restablece tu contraseña usando este enlace: ${resetLink}`
   return {
-    subject: `Restablece tu contrasena - ${BRAND_NAME}`,
+    subject: `Restablece tu contraseña - ${BRAND_NAME}`,
     ...renderBase({
       title,
       preheader,
       bodyHtml,
       bodyText,
       actionUrl: resetLink,
-      actionLabel: 'Restablecer contrasena'
+      actionLabel: 'Restablecer contraseña'
     })
   }
 }

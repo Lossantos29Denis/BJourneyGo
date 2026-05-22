@@ -42,7 +42,14 @@ export async function createPurchaseOrder(params: {
   })
 }
 
-export async function listUserOrders(userId: number) {
+export async function listUserOrders(userId: number, userEmail?: string) {
+  const normalizedEmail = String(userEmail || '').trim().toLowerCase()
+  const whereClauses = ['o.user_id = ?']
+  const params: any[] = [Number(userId)]
+  if (normalizedEmail) {
+    whereClauses.push('LOWER(COALESCE(o.contact_email, \'\')) = ?')
+    params.push(normalizedEmail)
+  }
   const rows: any = await query(
     `SELECT o.id, o.reference_code AS referenceCode, o.contact_email AS contactEmail,
             o.contact_phone AS contactPhone, o.total_amount AS totalAmount, o.currency,
@@ -59,9 +66,9 @@ export async function listUserOrders(userId: number) {
      LEFT JOIN \`Trip\` tr ON tr.id = t.trip_id
      LEFT JOIN \`Route\` r ON r.id = tr.route_id
           LEFT JOIN \`Agency\` a ON a.id = r.agency_id
-     WHERE o.user_id = ?
+     WHERE ${whereClauses.join(' OR ')}
      ORDER BY o.created_at DESC, t.id ASC`,
-    [Number(userId)]
+    params
   )
 
   const ordersMap = new Map<number, any>()
@@ -104,6 +111,6 @@ export async function listUserOrders(userId: number) {
 }
 
 export async function loadOrderWithTickets(orderId: number) {
-  const rows: any = await query('SELECT o.id, o.user_id AS userId, o.total_amount AS totalAmount, o.currency, o.status, o.payment_method AS paymentMethod, o.payment_reference AS paymentReference, o.created_at AS createdAt, o.updated_at AS updatedAt, t.id AS ticketId, t.uuid AS ticketUuid, t.order_id AS orderId, t.trip_id AS tripId, t.passenger_name AS passengerName, t.passenger_identification AS passengerIdentification, t.passenger_phone AS passengerPhone, t.is_contact AS isContact, t.seat_number AS seatNumber, t.price AS price, t.status AS ticketStatus, t.expires_at AS expiresAt, t.issued_at AS issuedAt, t.verified_at AS verifiedAt, t.verified_by_id AS verifiedById, t.qr_token AS qrToken, t.verification_count AS verificationCount FROM `Order` o LEFT JOIN `Ticket` t ON t.order_id = o.id WHERE o.id = ?', [Number(orderId)])
+  const rows: any = await query('SELECT o.id, o.user_id AS userId, o.contact_email AS contactEmail, o.total_amount AS totalAmount, o.currency, o.status, o.payment_method AS paymentMethod, o.payment_reference AS paymentReference, o.created_at AS createdAt, o.updated_at AS updatedAt, t.id AS ticketId, t.uuid AS ticketUuid, t.order_id AS orderId, t.trip_id AS tripId, t.passenger_name AS passengerName, t.passenger_identification AS passengerIdentification, t.passenger_phone AS passengerPhone, t.is_contact AS isContact, t.seat_number AS seatNumber, t.price AS price, t.status AS ticketStatus, t.expires_at AS expiresAt, t.issued_at AS issuedAt, t.verified_at AS verifiedAt, t.verified_by_id AS verifiedById, t.qr_token AS qrToken, t.verification_count AS verificationCount FROM `Order` o LEFT JOIN `Ticket` t ON t.order_id = o.id WHERE o.id = ?', [Number(orderId)])
   return rows || []
 }
