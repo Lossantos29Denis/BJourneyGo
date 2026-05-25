@@ -158,15 +158,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   arrowIcon: { width: 20, height: 20 },
-  
-
-
-
-
-
-
-  
-
-
-
 });
