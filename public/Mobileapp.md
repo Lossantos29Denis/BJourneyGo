@@ -78,8 +78,20 @@ Se encarga de la reserva de viajes dentro de la aplicación móvil. Las funcione
 - **Gestión de estados:** Controla y refleja el estado del proceso (cargando, procesando, errores, etc.) con indicadores y mensajes amigables.
 - **Restablecimiento y control modal:** Al abrir/cerrar el modal, restablece el estado de los formularios y selecciones relevantes para permitir nuevas reservas de forma limpia.
 
+## Explore.tsx
 
+El archivo `explore.tsx` implementa la pantalla "Mis Viajes" de la aplicación móvil, donde los usuarios pueden visualizar y gestionar sus billetes y reservas de viaje.
 
+- **Listado de viajes comprados:** Solicita y muestra todos los viajes comprados por el usuario, agrupando y organizando los billetes (tickets) a partir de órdenes/ventas recuperadas mediante la función `getMyOrders`.
+- **Clasificación de estado:** Cada viaje/billete tiene un estado calculado (Activo, Completado, Expirado) según su información de uso, fecha y estado:  
+  - Activo: viajable y vigente  
+  - Completado: ya finalizado por fecha o uso  
+  - Expirado: cancelado, reembolsado o caducado
+- **Detalles por billete:** Presenta la ruta, fecha/hora, agencia y otros datos; muestra una insignia visual (badge) de color y texto según el estado de cada ticket.
+- **Navegación a detalle:** Al tocar un viaje, redirige a una pantalla de detalle donde se puede ver el QR y más información del billete (gestionar billete).
+- **Actualización y recarga:** Permite refrescar la lista (pull to refresh) para traer nuevos datos o resolver errores de conexión.
+- **Gestión de errores y estados:** Muestra mensajes de carga, errores y ausencia de viajes, con opción de reintentar la carga.
+- **Interfaz visual amigable:** Estética consistente con la app (colores, iconos, sombras, badges de estado), uso de listas rápidas con FlatList y componentes visuales reutilizables.
 
 
 
