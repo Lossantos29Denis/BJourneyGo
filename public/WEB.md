@@ -366,3 +366,226 @@ Recomendado:
 - Consolidar responses para UI (contratos tipados).
 - E2E tests de compra, check-in y escaneo.
 - Cache de catalogo (routes/trips) en BFF.
+
+## 12) Inventario de archivos (Web)
+
+Raiz:
+- .dockerignore: exclusiones Docker (node_modules, dist, git, data).
+- .env.example: plantilla de entorno con API_URL.
+- .gitignore: archivos y carpetas ignoradas por Git.
+- astro.config.mjs: configuracion Astro con adapter Node y ajustes Vite.
+- Dockerfile: contenedor para deploy SSR.
+- package.json: dependencias y scripts de build/dev.
+- README.md: documentacion base del proyecto.
+- ROLES-SYSTEM-DOCUMENTATION.js: documentacion de roles y estructura localStorage.
+- tsconfig.json: TypeScript strict extendido de Astro.
+
+data:
+- data/users.json: usuarios de prueba con roles y credenciales mock.
+
+public (assets estaticos):
+- public/favicon.svg: favicon del sitio.
+- public/logo.svg: logo vectorial.
+- public/social-card.svg: imagen de social preview.
+- public/bJourneyGO4 (1).png: imagen de marketing.
+- public/Incremento.png: logo de partner.
+- public/login_background.jpg: fondo de login.
+- public/flags/be.svg: bandera de Belgica.
+- public/flags/de.svg: bandera de Alemania.
+- public/flags/es.svg: bandera de Espana.
+- public/flags/fr.svg: bandera de Francia.
+- public/flags/gb.svg: bandera de Reino Unido.
+- public/flags/it.svg: bandera de Italia.
+- public/flags/nl.svg: bandera de Paises Bajos.
+- public/flags/pl.svg: bandera de Polonia.
+- public/flags/pt.svg: bandera de Portugal.
+- public/flags/us.svg: bandera de Estados Unidos.
+
+public/src/scripts (JS cliente):
+- public/src/scripts/api.js: helpers HTTP y refresh automatico.
+- public/src/scripts/landing.js: interacciones de landing.
+- public/src/scripts/login.js: envio de login y estado de sesion.
+- public/src/scripts/register.js: registro de usuarios.
+- public/src/scripts/verify.js: verificacion de email.
+- public/src/scripts/olvide-contrasena.js: solicitud de reset.
+- public/src/scripts/restablecer-contrasena.js: formulario de reset.
+- public/src/scripts/comprar.js: busqueda y seleccion de viajes.
+- public/src/scripts/comprar-pasajeros.js: captura de pasajeros y checkout.
+- public/src/scripts/cambiar-viaje.js: flujo de cambio de viaje.
+- public/src/scripts/checkin.js: lookup y actualizacion de contacto.
+- public/src/scripts/mis-viajes.js: listado de ordenes, PDF y QR.
+- public/src/scripts/pago-exitoso.js: confirmacion de pago.
+- public/src/scripts/configuracion.js: configuracion intranet.
+- public/src/scripts/documentos-publicos.js: acceso a documentos publicos.
+- public/src/scripts/estadisticas.js: dashboard de estadisticas.
+- public/src/scripts/gestion-billetes.js: gestion de billetes.
+- public/src/scripts/gestion-usuarios.js: gestion de usuarios.
+- public/src/scripts/gestion-agencias.js: gestion de agencias.
+- public/src/scripts/intranet-login.js: login intranet.
+- public/src/scripts/intranet-panel.js: panel intranet.
+- public/src/scripts/intranet-agencias.js: intranet de agencias.
+- public/src/scripts/intranet-calendario-turnos.js: calendario y turnos.
+- public/src/scripts/intranet-config.js: configuracion intranet.
+- public/src/scripts/intranet-documentos.js: documentos intranet.
+- public/src/scripts/intranet-escaner-qr.js: escaner QR.
+- public/src/scripts/intranet-operadores-scanner.js: operadores de scanner.
+
+public/src/pages/api (copias para hosting estatico):
+- public/src/pages/api/login.js: proxy login.
+- public/src/pages/api/logout.js: proxy logout.
+- public/src/pages/api/me.js: proxy perfil.
+- public/src/pages/api/refresh.js: proxy refresh.
+- public/src/pages/api/register.js: proxy registro.
+- public/src/pages/api/resend-verify.js: proxy resend verify.
+- public/src/pages/api/verify.js: proxy verify.
+- public/src/pages/api/verify-status.js: proxy verify status.
+- public/src/pages/api/verify-code.post.ts: proxy verify code.
+- public/src/pages/api/send-verification.post.ts: proxy envio verificacion.
+- public/src/pages/api/verificationStore.js: storage de verificacion.
+- public/src/pages/api/delete-user.js: proxy delete-user.
+- public/src/pages/api/update-user.js: proxy update-user.
+- public/src/pages/api/sync-user.js: proxy sync-user.
+- public/src/pages/api/trips.js: proxy trips.
+- public/src/pages/api/routes.js: proxy rutas.
+- public/src/pages/api/documents.js: proxy documentos.
+- public/src/pages/api/stripe/checkout.js: proxy stripe checkout.
+- public/src/pages/api/stripe/confirm.js: proxy stripe confirm.
+- public/src/pages/api/admin/agencies.js: proxy admin agencias.
+- public/src/pages/api/admin/buses.js: proxy admin buses.
+- public/src/pages/api/admin/calendar-events.js: proxy admin calendar events.
+- public/src/pages/api/admin/config.js: proxy admin config.
+- public/src/pages/api/admin/documents.js: proxy admin documents.
+- public/src/pages/api/admin/email-verifications.js: proxy admin email verifications.
+- public/src/pages/api/admin/routes.js: proxy admin routes.
+- public/src/pages/api/admin/shift-users.js: proxy admin shift users.
+- public/src/pages/api/admin/shifts.js: proxy admin shifts.
+- public/src/pages/api/admin/stats.js: proxy admin stats.
+- public/src/pages/api/admin/trips.js: proxy admin trips.
+- public/src/pages/api/admin/users.js: proxy admin users.
+
+src/assets:
+- src/assets/astro.svg: logo de Astro.
+- src/assets/background.svg: fondo vectorial.
+- src/assets/bjournet.png: imagen de marca.
+- src/assets/bjournet-removebg-preview.png: logo sin fondo.
+- src/assets/Incremento.png: logo de partner.
+
+src/components:
+- src/components/Welcome.astro: componente de bienvenida.
+
+src/layouts:
+- src/layouts/Layout.astro: layout general del sitio.
+- src/layouts/AuthLayout.astro: layout de autenticacion.
+
+src/pages (rutas Astro):
+- src/pages/index.astro: home principal.
+- src/pages/landing.astro: landing de marketing.
+- src/pages/inicio.astro: pagina de inicio alternativa.
+- src/pages/comprar.astro: busqueda de viajes.
+- src/pages/comprar-pasajeros.astro: formulario de pasajeros y pago.
+- src/pages/pago-exitoso.astro: confirmacion de pago.
+- src/pages/pago-cancelado.astro: pago cancelado.
+- src/pages/compra-prueba-exitosa.astro: confirmacion de compra de prueba.
+- src/pages/checkin.astro: check-in publico.
+- src/pages/login.astro: login web.
+- src/pages/register.astro: registro.
+- src/pages/verify.astro: verificacion de email.
+- src/pages/olvide-contrasena.astro: solicitud de reset.
+- src/pages/restablecer-contrasena.astro: formulario de reset.
+- src/pages/mis-viajes.astro: listado de viajes del usuario.
+- src/pages/intranet-login.astro: login intranet.
+- src/pages/intranet.astro: panel intranet.
+- src/pages/estadisticas.astro: dashboard de estadisticas.
+- src/pages/gestion-usuarios.astro: gestion de usuarios.
+- src/pages/gestion-billetes.astro: gestion de billetes.
+- src/pages/documentos.astro: documentos publicos.
+- src/pages/configuracion.astro: configuracion intranet.
+- src/pages/admin.astro: panel admin general.
+- src/pages/intranet/agencias.astro: gestion de agencias.
+- src/pages/intranet/operadores-scanner.astro: operadores scanner.
+- src/pages/intranet/escaner-qr.astro: escaner QR.
+- src/pages/intranet/documentos.astro: documentos intranet.
+- src/pages/intranet/configuracion.astro: configuracion intranet.
+- src/pages/intranet/calendario-turnos.astro: calendario de turnos.
+- src/pages/mis-viajes/cambiar/[uuid].astro: cambio de viaje por ticket.
+- src/pages/uploads/[...path].js: proxy de archivos /uploads.
+
+src/pages/api (BFF/proxy):
+- src/pages/api/_lib/proxy.js: utilidades de proxy (JSON/stream/formdata).
+- src/pages/api/login.js: proxy login.
+- src/pages/api/logout.js: proxy logout.
+- src/pages/api/me.js: proxy perfil.
+- src/pages/api/refresh.js: proxy refresh.
+- src/pages/api/register.js: proxy registro.
+- src/pages/api/resend-verify.js: proxy resend verify.
+- src/pages/api/verify.js: proxy verify.
+- src/pages/api/verify-status.js: proxy verify status.
+- src/pages/api/verify-code.post.ts: proxy verify code.
+- src/pages/api/send-verification.post.ts: proxy envio verificacion.
+- src/pages/api/verificationStore.js: storage de verificacion.
+- src/pages/api/auth/send-reset.js: proxy envio de reset.
+- src/pages/api/auth/reset.js: proxy reset de contrasena.
+- src/pages/api/delete-user.js: proxy delete-user.
+- src/pages/api/update-user.js: proxy update user.
+- src/pages/api/sync-user.js: proxy sync user.
+- src/pages/api/trips.js: proxy trips.
+- src/pages/api/routes.js: proxy rutas.
+- src/pages/api/documents.js: proxy documentos.
+- src/pages/api/contact.js: proxy contacto.
+- src/pages/api/checkin/lookup.js: proxy lookup check-in.
+- src/pages/api/checkin/update-contact.js: proxy update contact.
+- src/pages/api/orders/my.js: proxy mis ordenes.
+- src/pages/api/orders/tickets/[uuid]/alternatives.js: proxy alternativas de cambio.
+- src/pages/api/orders/tickets/[uuid]/change-trip.js: proxy cambio de trip.
+- src/pages/api/orders/tickets/[uuid]/change-trip-checkout.js: proxy checkout de cambio.
+- src/pages/api/orders/tickets/[uuid]/refund-request.js: proxy solicitud de reembolso.
+- src/pages/api/payments/test-purchase.js: proxy compra de prueba.
+- src/pages/api/stripe/checkout.js: proxy stripe checkout.
+- src/pages/api/stripe/confirm.js: proxy stripe confirm.
+- src/pages/api/tickets/[uuid]/pdf.js: proxy PDF de ticket.
+- src/pages/api/tickets/verify-qr.js: proxy verificacion QR.
+- src/pages/api/tickets/scanner/active-session.js: proxy sesion activa.
+- src/pages/api/tickets/scanner/admin-start-session.js: proxy iniciar sesion admin.
+- src/pages/api/tickets/scanner/start-session.js: proxy iniciar sesion.
+- src/pages/api/tickets/scanner/operators.js: proxy operadores scanner.
+- src/pages/api/tickets/scanner/operator-access.js: proxy accesos operador.
+- src/pages/api/tickets/scanner/trips.js: proxy trips scanner.
+- src/pages/api/tickets/scanner/trips/[tripId]/passengers.js: proxy pasajeros por trip.
+- src/pages/api/uploads/[...path].js: proxy de archivos /uploads.
+- src/pages/api/admin/agencies.js: proxy admin agencias.
+- src/pages/api/admin/buses.js: proxy admin buses.
+- src/pages/api/admin/calendar-events.js: proxy admin calendar events.
+- src/pages/api/admin/config.js: proxy admin config.
+- src/pages/api/admin/documents.js: proxy admin documentos.
+- src/pages/api/admin/documents/upload.js: proxy upload documento.
+- src/pages/api/admin/documents/[id].js: proxy documento por id.
+- src/pages/api/admin/email-verifications.js: proxy admin email verifications.
+- src/pages/api/admin/routes.js: proxy admin routes.
+- src/pages/api/admin/routes/[id].js: proxy route por id.
+- src/pages/api/admin/shift-users.js: proxy admin shift users.
+- src/pages/api/admin/shifts.js: proxy admin shifts.
+- src/pages/api/admin/stats.js: proxy admin stats.
+- src/pages/api/admin/trips.js: proxy admin trips.
+- src/pages/api/admin/trips/[id].js: proxy trip por id.
+- src/pages/api/admin/users.js: proxy admin users.
+
+src/styles:
+- src/styles/landing.css: estilos de landing.
+- src/styles/login.css: estilos de login.
+- src/styles/register.css: estilos de registro.
+- src/styles/verify.css: estilos de verificacion.
+- src/styles/comprar.css: estilos de compra.
+- src/styles/comprar-pasajeros.css: estilos de pasajeros.
+- src/styles/cambiar-viaje.css: estilos de cambio de viaje.
+- src/styles/checkout.css: estilos de checkout.
+- src/styles/checkin.css: estilos de check-in.
+- src/styles/mis-viajes.css: estilos de mis viajes.
+- src/styles/configuracion.css: estilos de configuracion.
+- src/styles/gestion-usuarios.css: estilos de gestion de usuarios.
+- src/styles/gestion-agencias.css: estilos de gestion de agencias.
+- src/styles/intranet-login.css: estilos de login intranet.
+- src/styles/intranet-config.css: estilos de config intranet.
+- src/styles/intranet-documentos.css: estilos de documentos intranet.
+- src/styles/intranet-calendario-turnos.css: estilos de calendario.
+- src/styles/intranet-escaner-qr.css: estilos de escaner QR.
+- src/styles/intranet-operadores-scanner.css: estilos de operadores scanner.

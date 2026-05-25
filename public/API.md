@@ -736,3 +736,104 @@ curl -X POST https://api.tu-dominio.com/api/auth/login \
 curl https://api.tu-dominio.com/api/auth/me \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
+
+## 12) Inventario de archivos (API)
+
+Raiz:
+- .env.example: plantilla de variables de entorno (DB, JWT, SMTP, etc.).
+- .gitignore: archivos y carpetas ignoradas por Git.
+- docker-compose.yml: orquesta MySQL 8.0 y la API con volumenes y red compartida.
+- Dockerfile: imagen Node 18 con netcat; espera MySQL antes de iniciar.
+- package.json: scripts (dev/build/check-db/seed/create-admin/test) y dependencias clave.
+- README.md: guia de setup, variables, migraciones y desarrollo local.
+- tsconfig.json: TypeScript ES2020 con strict y NodeNext.
+- wait-for-mysql.sh: script de espera por conectividad TCP a MySQL.
+
+docs:
+- docs/api-refactor.md: log de refactor y reordenamiento de rutas/handlers.
+
+scripts:
+- scripts/seed_sample_data.js: crea datos de ejemplo (agency, routes, trips, users, orders).
+- scripts/create_admin.js: crea/actualiza usuario admin con variables ADMIN_*.
+- scripts/apply_migration_remote.js: aplica migracion alter_ticket_add_timestamps.sql con chequeos.
+- scripts/check_remote_db.js: inspecciona esquema remoto (DDL y triggers de Ticket).
+- scripts/recreate_db_remote.js: destruye y recrea schema remoto desde db/schema_init.sql.
+- scripts/send-test-mail.js: prueba de envio de email via nodemailer.
+- scripts/get-oauth-refresh-token.js: flujo OAuth2 para obtener refresh token SMTP.
+- scripts/test_integration_purchase.js: prueba end-to-end de compra.
+
+src/lib:
+- src/lib/db.ts: pool MySQL (mysql2/promise), helpers query/transaction y soporte DATABASE_URL.
+- src/lib/mailer.ts: envio de email (Mailjet/SMTP) con fallback a stub.
+- src/lib/emailTemplates.ts: plantillas HTML/texto con branding y botones de accion.
+- src/lib/startupChecks.ts: valida JWT_SECRET, DB, columnas de Ticket y triggers.
+
+src/scripts:
+- src/scripts/check-db.ts: test rapido de conectividad a DB.
+
+src/server:
+- src/server/app.ts: inicializa Express, CORS, Morgan y rutas; sirve /uploads.
+- src/server/index.ts: entrypoint; ejecuta checks y escucha en PORT.
+- src/server/middleware.ts: auth JWT, blacklist y resolucion de roles.
+- src/server/routeRegistry.ts: registro centralizado de routers.
+
+src/types:
+- src/types/express.d.ts: extiende Request con payload de usuario.
+
+src/routes/express:
+- src/routes/express/auth.ts: router de autenticacion y perfil.
+- src/routes/express/admin.ts: router admin (rutas, viajes, personas, documentos, stats).
+- src/routes/express/catalog.ts: catalogo publico (trips y data base).
+- src/routes/express/tickets.ts: gestion de tickets del usuario.
+- src/routes/express/orders.ts: gestion de ordenes y estado.
+- src/routes/express/payments.ts: pagos (Stripe y conciliacion).
+- src/routes/express/agency.ts: endpoints de agencia y trabajadores.
+- src/routes/express/contact.ts: formulario de contacto.
+- src/routes/express/public.ts: check-in publico y update de contacto.
+- src/routes/express/health.ts: health check.
+- src/routes/express/qr.ts: QR y verificacion de ventana temporal.
+- src/routes/express/offlineVerify.ts: verificacion offline.
+- src/routes/express/orderTickets.ts: operaciones sobre tickets dentro de ordenes.
+- src/routes/express/adminEmailTokens.ts: gestion admin de tokens de email.
+
+src/routes/express/utils:
+- src/routes/express/utils/accessControl.ts: helpers de permisos y ownership.
+- src/routes/express/utils/authUtils.ts: utilidades de JWT y roles.
+- src/routes/express/utils/adminUtils.ts: utilidades admin y normalizacion de datos.
+- src/routes/express/utils/checkinValidators.ts: validadores de check-in.
+- src/routes/express/utils/inputParsers.ts: normalizacion de referencia, email y telefono.
+- src/routes/express/utils/paymentUtils.ts: helpers de pagos y parseo de IDs.
+- src/routes/express/utils/ticketChange.ts: reglas y calculos de cambio de ticket.
+- src/routes/express/utils/ticketValidators.ts: matching de identificadores con normalizacion.
+
+src/routes/express/handlers:
+- src/routes/express/handlers/authEmailHandlers.ts: verificacion email y reset de password.
+- src/routes/express/handlers/authProfileHandlers.ts: lectura/actualizacion de perfil.
+- src/routes/express/handlers/authSessionHandlers.ts: login, refresh y logout.
+- src/routes/express/handlers/catalogDataHandlers.ts: datos de catalogo (origen/destino).
+- src/routes/express/handlers/catalogTripsHandlers.ts: busqueda de trips y disponibilidad.
+- src/routes/express/handlers/ticketsHandlers.ts: lookup y detalle de tickets.
+- src/routes/express/handlers/ticketPdfHandlers.ts: PDF de ticket con QR.
+- src/routes/express/handlers/ordersHandlers.ts: ordenes y validacion de acceso.
+- src/routes/express/handlers/orderTicketsHandlers.ts: cambios/cancelaciones de tickets.
+- src/routes/express/handlers/stripePaymentHandlers.ts: integracion Stripe.
+- src/routes/express/handlers/paymentProcessingHandlers.ts: flujo generico de pagos.
+- src/routes/express/handlers/publicHandlers.ts: check-in publico y update contacto.
+- src/routes/express/handlers/contactHandlers.ts: envio de mensajes de contacto.
+- src/routes/express/handlers/offlineVerifyHandlers.ts: verificacion offline.
+- src/routes/express/handlers/adminTripsHandlers.ts: CRUD de viajes admin.
+- src/routes/express/handlers/adminRoutesHandlers.ts: CRUD de rutas admin.
+- src/routes/express/handlers/adminScheduleHandlers.ts: turnos y calendario.
+- src/routes/express/handlers/adminPeopleHandlers.ts: usuarios, buses y personal.
+- src/routes/express/handlers/adminDocumentsHandlers.ts: gestion de documentos.
+- src/routes/express/handlers/adminEmailTokensHandlers.ts: verificacion y logs de tokens.
+- src/routes/express/handlers/agencyHandlers.ts: operaciones de agencia.
+
+src/routes/express/services:
+- src/routes/express/services/orderService.ts: crea orden, reserva asientos y emite tickets.
+- src/routes/express/services/checkinService.ts: lookup de ordenes/tickets por referencia.
+- src/routes/express/services/adminTripsService.ts: queries de viajes por agencia.
+- src/routes/express/services/adminRoutesService.ts: CRUD de rutas por agencia.
+- src/routes/express/services/adminPeopleService.ts: queries de buses y usuarios.
+- src/routes/express/services/adminScheduleService.ts: queries de turnos por rango.
+- src/routes/express/services/adminDocumentsService.ts: queries de documentos por categoria/agencia.
