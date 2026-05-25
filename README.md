@@ -1,54 +1,58 @@
 # BJourneyGo
 
-BJourneyGo is a bus ticketing platform composed of three apps and a shared SQL layer:
+Plataforma de venta de billetes de autobus con tres aplicaciones (API, web y movil) y una capa SQL compartida.
 
-- **BJourneyGo-api**: Node.js + TypeScript API for authentication, trips, orders, tickets, QR validation, email, Stripe checkout, and admin operations.
-- **BJourneyGo-develop**: Expo / React Native mobile app for passengers and staff.
-- **BJourneyGo-web**: Astro web app for the public site and administration flows.
-- **db**: initial schema and migration SQL.
+## Proyectos incluidos
 
-The repository is organized as a multi-project workspace. Each app has its own `package.json`, `.env.example`, and runtime commands.
+- API: [BJourneyGo-api](BJourneyGo-api)
+- Web (publico + intranet): [BJourneyGo-web/BJourneyGo-web](BJourneyGo-web/BJourneyGo-web)
+- Mobile (Expo/React Native): [BJourneyGo-develop/BJourneyGo-develop](BJourneyGo-develop/BJourneyGo-develop)
+- SQL y migraciones: [db](db)
 
-## Project Structure
+Documentacion tecnica adicional:
+- API: [public/API.md](public/API.md)
+- Web: [public/WEB.md](public/WEB.md)
+- Despliegue: [DEPLOY.md](DEPLOY.md)
 
-```text
-BJourneyGo/
-├── BJourneyGo-api/
-├── BJourneyGo-develop/
-├── BJourneyGo-web/
-├── db/
-├── DEPLOY.md
-└── README.md
+## Requisitos
+
+- Node.js 18+
+- npm
+- MySQL 8+
+- Expo Go o emulador Android/iOS (para mobile)
+
+## Glosario y naming
+
+Terminologia preferida en todo el repo:
+
+- Billete: unidad de viaje asociada a un pasajero.
+- Orden: compra que agrupa billetes y pago.
+- Viaje: salida programada de una ruta.
+- Ruta: origen/destino con duracion y distancia.
+- Intranet: panel operativo interno (admin, agencia, scanner).
+
+Roles oficiales (se mantienen con nombre tecnico):
+
+- ADMIN: administrador global.
+- AGENCY_ADMIN: administrador de agencia.
+- AGENCY_WORKER: operador de agencia.
+- SCANNER: operador de escaneo/validacion.
+
+## Arquitectura (alto nivel)
+
+```mermaid
+flowchart LR
+	Web[Web (Astro SSR)] -->|BFF /api| API[API (Express)]
+	Mobile[Mobile (Expo)] -->|HTTP| API
+	API --> DB[(MySQL)]
+	API --> Uploads[/uploads]
+	API --> Stripe[Stripe]
+	API --> Mail[Mailjet/SMTP]
 ```
 
-## Main Features
+## Inicio rapido
 
-- User registration and login.
-- Trip search by route code, origin, or destination.
-- Ticket purchase with passenger data.
-- Stripe checkout flow.
-- QR generation and validation for tickets.
-- Admin and operations screens for trips, users, schedules, and reporting.
-- Automatic trip status normalization when the arrival time has passed.
-
-## Tech Stack
-
-- **Backend**: Express, TypeScript, MySQL, JWT, Stripe, Nodemailer / Mailjet.
-- **Mobile**: Expo, React Native, TypeScript, Expo Router.
-- **Web**: Astro.
-- **Database**: MySQL scripts and migrations in `db/`.
-
-## Requirements
-
-- Node.js 18+.
-- npm.
-- MySQL 8+.
-- Git.
-- Expo Go or an Android/iOS emulator if you want to run the mobile app locally.
-
-## Setup
-
-Install dependencies inside each project folder:
+Instala dependencias por proyecto:
 
 ```bash
 cd BJourneyGo-api
@@ -61,115 +65,67 @@ cd ..\..\BJourneyGo-web\BJourneyGo-web
 npm install
 ```
 
-Each app already includes an `.env.example` file:
+## Variables de entorno
 
-- `BJourneyGo-api/.env.example`
-- `BJourneyGo-develop/BJourneyGo-develop/.env.example`
-- `BJourneyGo-web/BJourneyGo-web/.env.example`
+Cada proyecto tiene su propio archivo de ejemplo:
 
-Copy the example file to `.env` in each folder and adjust it for your environment.
+- API: [BJourneyGo-api/.env.example](BJourneyGo-api/.env.example)
+- Web: [BJourneyGo-web/BJourneyGo-web/.env.example](BJourneyGo-web/BJourneyGo-web/.env.example)
+- Mobile: [BJourneyGo-develop/BJourneyGo-develop/.env.example](BJourneyGo-develop/BJourneyGo-develop/.env.example)
 
-## Environment Variables
+Copia el archivo a .env en cada proyecto y ajusta los valores segun tu entorno.
 
-### API
+## Desarrollo local
 
-The API expects, at minimum:
-
-```env
-DATABASE_URL="mysql://user:password@localhost:3306/bjourneygo"
-JWT_SECRET="replace_this_with_a_strong_secret"
-PORT=4000
-WEB_URL=http://localhost:4321
-```
-
-Optional email and payment variables are documented in `BJourneyGo-api/.env.example`.
-
-### Mobile
-
-The mobile app mainly needs the public API URL:
-
-```env
-API_URL=https://api.bjourneygo.me
-```
-
-### Web
-
-The web app also points to the API URL:
-
-```env
-API_URL=https://api.bjourneygo.me
-```
-
-## Local Development
-
-### API
+API:
 
 ```bash
 cd BJourneyGo-api
 npm run dev
 ```
 
-Useful API scripts:
-
-- `npm run build`
-- `npm run check-db`
-- `npm run seed-sample-data`
-- `npm run create-admin`
-- `npm run test-integration`
-
-### Mobile
+Mobile:
 
 ```bash
-cd BJourneyGo-develop/BJourneyGo-develop
+cd BJourneyGo-develop\BJourneyGo-develop
 npm run start
 ```
 
-Other useful commands:
-
-- `npm run android`
-- `npm run ios`
-- `npm run web`
-- `npm run lint`
-
-### Web
+Web:
 
 ```bash
-cd BJourneyGo-web/BJourneyGo-web
+cd BJourneyGo-web\BJourneyGo-web
 npm run dev
 ```
 
-Other useful commands:
+## Base de datos
 
-- `npm run build`
-- `npm run preview`
+El esquema inicial y las migraciones estan en:
 
-## Database
+- [db/schema_init.sql](db/schema_init.sql)
+- [db/migrations](db/migrations)
 
-The `db/` folder contains the initial schema and migrations used by the project.
+Recomendado: crear la base de datos y aplicar el esquema inicial antes de levantar la API.
 
-- `db/schema_init.sql`
-- `db/migrations/`
+## Flujos clave
 
-If you are starting from zero, create the MySQL database first and then apply the schema or migrations according to the API instructions.
+- Compra: busqueda de viajes -> datos de pasajeros -> pago -> emision de billetes.
+- Check-in: lookup de orden por referencia + email/telefono -> validacion y descarga de QR.
+- Intranet: login por rol -> gestion de viajes, billetes, usuarios y reportes.
 
-## Important Notes
+## Flujos clave (detalle)
 
-- There is no single root app command for all projects; each subproject runs independently.
-- Keep secrets out of git. The repository uses `.gitignore` files for each app and a root `.gitignore` for shared exclusions.
-- If Git asks for credentials, use the account that has access to the repository.
-- For deployment instructions, use `DEPLOY.md`.
+- Compra: web/mobile consulta viajes, crea orden, confirma pago y emite billetes con QR.
+- Post-pago: guarda referencia y permite descarga de PDF/QR en Mis viajes.
+- Scanner: inicia sesion, valida QR, registra verificacion y actualiza estado.
 
-## Troubleshooting
+## Notas utiles
 
-- If the API cannot connect to MySQL, verify `DATABASE_URL`, the database name, and that the MySQL service is running.
-- If the mobile app cannot load trips, confirm `API_URL` points to the correct public API.
-- If the web app fails to start, verify that its own dependencies are installed inside `BJourneyGo-web/BJourneyGo-web`.
+- No hay comando unico para levantar todo el monorepo; cada proyecto corre por separado.
+- Si la web o mobile no cargan datos, valida que API_URL apunte al entorno correcto.
 
-## Reference Files
+## Soporte y guias
 
-- API setup: `BJourneyGo-api/README.md`
-- Web setup: `BJourneyGo-web/BJourneyGo-web/README.md`
-- API environment example: `BJourneyGo-api/.env.example`
-- Mobile environment example: `BJourneyGo-develop/BJourneyGo-develop/.env.example`
-- Web environment example: `BJourneyGo-web/BJourneyGo-web/.env.example`
-- Deployment guide: `DEPLOY.md`
+- Guia API: [BJourneyGo-api/README.md](BJourneyGo-api/README.md)
+- Guia Web: [BJourneyGo-web/BJourneyGo-web/README.md](BJourneyGo-web/BJourneyGo-web/README.md)
+- Guia Mobile: [BJourneyGo-develop/BJourneyGo-develop/README.md](BJourneyGo-develop/BJourneyGo-develop/README.md)

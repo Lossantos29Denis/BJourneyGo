@@ -1,187 +1,180 @@
-# BJourneyGo API — Setup y ejecución
+# BJourneyGo API
 
-Este README explica cómo preparar y ejecutar la API localmente, con Prisma y opciones para aplicar el SQL inicial.
+API en Node.js + TypeScript para autenticacion, catalogo de viajes, ordenes, billetes, QR, email, pagos y operaciones administrativas.
 
-Requisitos
-- Node.js (v18+ recomendado)
-- NPM
-- MySQL 8+ (o compatible)
+## Stack
 
-1) Variables de entorno
+- Node.js + Express
+- TypeScript
+- MySQL (mysql2)
+- JWT
+- Stripe
+- Nodemailer o Mailjet
 
-Crea un archivo `.env` en la raíz de `BJourneyGo-api` con estas variables (ajusta según tu entorno):
+## Arquitectura
 
+```mermaid
+flowchart LR
+	Client[Web/Mobile] -->|HTTP| Express[Express API]
+	Express --> Routes[Rutas]
+	Routes --> Handlers[Handlers]
+	Handlers --> Services[Services]
+	Services --> DB[(MySQL)]
+	Services --> Stripe[Stripe]
+	Services --> Mail[Mailjet/SMTP]
+	Express --> Uploads[/uploads]
 ```
-DATABASE_URL="mysql://dbuser:dbpass@localhost:3306/BJourneyGo"
-JWT_SECRET="un-secreto-largo-y-random"
+
+## Requisitos
+
+- Node.js 18+
+- npm
+- MySQL 8+
+
+## Glosario y roles
+
+- Orden: compra que agrupa billetes y pagos.
+- Billete: unidad emitida por pasajero.
+- Viaje: salida programada de una ruta.
+
+Roles oficiales:
+
+- ADMIN
+- AGENCY_ADMIN
+- AGENCY_WORKER
+- SCANNER
+
+## Configuracion de entorno
+
+Copia el ejemplo y ajusta valores:
+
+- [BJourneyGo-api/.env.example](.env.example)
+
+Variables minimas:
+
+```env
+DATABASE_URL="mysql://user:password@localhost:3306/bjourneygo"
+JWT_SECRET="reemplaza_con_un_secreto_fuerte"
 PORT=4000
+WEB_URL=http://localhost:4321
 ```
 
-Si quieres enviar correos (verificación, restablecer contraseña) añade estas variables SMTP (MailerSend recomendado):
+Correo (opcional):
 
+```env
+MAILJET_API_KEY=...
+MAILJET_API_SECRET=...
+MAILJET_FROM_EMAIL=...
+MAILJET_FROM_NAME=BJourneyGo
 ```
-SMTP_HOST=smtp.mailersend.net
+
+O SMTP (opcional):
+
+```env
+SMTP_HOST=...
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=smtp_your_user
-SMTP_PASS=your-smtp-password
+SMTP_USER=...
+SMTP_PASS=...
 SMTP_FROM="BJourneyGo <no-reply@bjourneygo.com>"
-SMTP_FROM_NAME="BJourneyGo"
+SMTP_FROM_NAME=BJourneyGo
 ```
 
-Para otros proveedores SMTP, ajusta host/puerto/secure según la documentación.
+Pagos (opcional):
 
-Notas:
-- `JWT_SECRET` es obligatorio.
-- Si la BD no existe, `prisma migrate` puede crearla si el usuario tiene permisos, o crea la DB manualmente.
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_SUCCESS_URL=https://www.bjourneygo.me/pago-exitoso
+STRIPE_CANCEL_URL=https://www.bjourneygo.me/pago-cancelado
+STRIPE_CURRENCY=EUR
+```
 
-2) Instalar dependencias y generar cliente Prisma
+## Instalacion
 
 ```bash
-cd "C:/Users/denis/Desktop/BJourneyGo/BJourneyGo-api"
+cd BJourneyGo-api
 npm install
-npx prisma generate
 ```
 
-3) Migraciones
+## Base de datos
 
-Opción A — Migraciones Prisma (recomendado durante desarrollo):
+El esquema inicial esta en [db/schema_init.sql](../db/schema_init.sql). Puedes aplicarlo manualmente:
 
 ```bash
-npx prisma migrate dev --name init
+mysql -u root -p bjourneygo < "..\db\schema_init.sql"
 ```
 
-Opción B — Aplicar SQL manualmente (usa si no quieres migraciones Prisma ahora):
+Migraciones adicionales:
 
-```bash
-# desde Powershell, ajusta la ruta si hace falta
-mysql -u root -p BJourneyGo < "..\db\schema_init.sql"
-```
+- [db/migrations](../db/migrations)
 
-4) Arrancar la API en desarrollo
+## Ejecucion en desarrollo
 
 ```bash
 npm run dev
 ```
 
-9) Probar envío de email (test)
-
-Para verificar que tu configuración SMTP funciona, copia `.env.example` a `.env` y rellena `SMTP_USER` y `SMTP_PASS` (App Password para Gmail). Luego ejecuta el script de prueba:
+## Ejecucion en produccion
 
 ```bash
-# en la carpeta BJourneyGo-api
-node scripts/send-test-mail.js
+npm run build
+npm run start
 ```
 
-Si la cuenta está correctamente configurada verás `Message sent:` y si se usó Ethereal también un `Preview URL:` para inspeccionar el correo.
+## Flujos clave
 
+- Registro/verify: alta de usuario y confirmacion de email.
+- Compra: creacion de orden, emision de billetes y pago.
+- Check-in: lookup por referencia y validacion QR.
+- Intranet: operaciones admin por rol (rutas, viajes, billetes, usuarios, documentos).
 
-Rutas útiles tras arrancar:
+## Flujos clave (detalle)
+
+- Registro: POST /auth/register -> envio de verificacion -> /auth/verify.
+- Compra: POST /orders/purchase o /payments/stripe/checkout -> confirmacion -> emision de billetes.
+- Check-in: POST /checkin/lookup -> devuelve orden y billetes -> update contacto opcional.
+- Scanner: /tickets/scanner/start-session -> /tickets/verify-qr -> log de verificacion.
+
+## Scripts utiles
+
+- `npm run check-db`: prueba de conectividad a DB.
+- `npm run seed-sample-data`: datos de ejemplo.
+- `npm run create-admin`: crea usuario admin.
+- `npm run test-integration`: prueba end-to-end de compra.
+
+Scripts directos (Node):
+
+- [scripts/send-test-mail.js](scripts/send-test-mail.js): prueba de envio de email.
+- [scripts/seed_sample_data.js](scripts/seed_sample_data.js): seed de datos.
+- [scripts/create_admin.js](scripts/create_admin.js): crea admin.
+- [scripts/test_integration_purchase.js](scripts/test_integration_purchase.js): prueba de compra.
+- [scripts/apply_migration_remote.js](scripts/apply_migration_remote.js): aplica SQL remoto.
+- [scripts/recreate_db_remote.js](scripts/recreate_db_remote.js): recrea DB remota.
+- [scripts/check_remote_db.js](scripts/check_remote_db.js): inspecciona esquema remoto.
+
+## Rutas utiles
+
 - API base: http://localhost:4000
 - Swagger UI: http://localhost:4000/docs
 - Swagger JSON: http://localhost:4000/documentation/json
 
-5) Ejecutar en producción
+## Subidas
 
-```bash
-npm run build
-NODE_ENV=production PORT=4000 JWT_SECRET="tu-secret" node dist/index.js
-```
+Los archivos subidos se sirven desde /uploads.
 
-6) Comandos Windows (PowerShell) para variables temporales
+## Seguridad
 
-```powershell
-$env:DATABASE_URL = "mysql://dbuser:dbpass@localhost:3306/BJourneyGo"
-$env:JWT_SECRET = "un-secreto-largo-y-random"
-$env:PORT = "4000"
-npm run dev
-```
+- JWT para autenticacion y roles.
+- Lista negra de access tokens en logout.
+- Ventanas de verificacion QR configurables por env.
 
-7) Problemas comunes y soluciones rápidas
-- Error: `JWT_SECRET environment variable is required` → asegúrate que `.env` exista y contenga `JWT_SECRET`.
-- Errores de migración por permisos → crea la BD manualmente o ejecuta SQL con un usuario con permisos.
-- Conn. MySQL rechazada → verifica host/port/credenciales y que el servicio MySQL esté activo.
+## Observabilidad
 
-8) Siguientes pasos sugeridos
-- Ejecutar `npx prisma migrate dev` para crear las tablas y `npx prisma generate` para actualizar el cliente.
-- Poblar `User`/`Agency` de prueba (seed) y probar login `/auth/login` desde la UI.
+- Logs HTTP via Morgan.
+- Errores de pagos y verificaciones recomendados para tracking.
 
-9) Mailjet (opcional)
+## Problemas comunes
 
-Si quieres usar Mailjet para enviar correos transaccionales (verificación, reseteo, recibos) en lugar de SMTP:
-
-- Variables de entorno necesarias:
-
-```
-MAILJET_API_KEY=your_mailjet_key
-MAILJET_API_SECRET=your_mailjet_secret
-MAILJET_FROM_EMAIL=no-reply@bjourneygo.com
-MAILJET_FROM_NAME="BJourneyGo"
-```
-
-El mailer en `src/lib/mailer.ts` usa Mailjet cuando están las credenciales; si faltan, intenta SMTP. Si no hay ninguno configurado, se suprime el envío y se registra una advertencia.
-
-10) Migraciones y cambios SQL adicionales
-
-Hicimos cambios en el esquema `Ticket` (nuevas columnas `uuid`, `issued_at`, `created_at`, `updated_at`) y creamos una migración SQL en `db/migrations/alter_ticket_add_timestamps.sql`.
-
-Para aplicar migraciones manualmente a un servidor remoto sin acceso directo a `mysql` en este entorno, hay scripts en `scripts/`:
-
-- `scripts/apply_migration_remote.js` — intenta aplicar un archivo SQL remoto usando la conexión provista.
-- `scripts/recreate_db_remote.js` — recrea la base de datos remota a partir de `db/schema_init.sql`.
-- `scripts/check_remote_db.js` — comprueba la estructura (columns, triggers) de `Ticket` en la DB remota.
-
-Si tu servidor MySQL tiene `log_bin` habilitado, la creación de triggers puede requerir `SUPER` o `log_bin_trust_function_creators=1`. En ese caso puedes:
-
-- Pedir al administrador que habilite `log_bin_trust_function_creators` o que aplique el trigger por ti.
-- Ofiusar el trigger; la aplicación ahora genera `uuid` y `issued_at` desde el lado de la app.
-
-11) Script de integración (pruebas básicas)
-
-Hay un script de integración que simula: seed de datos, registro de usuario, login, compra de billete y reconciliación de pago:
-
-```
-node scripts/test_integration_purchase.js
-```
-
-Añade en `.env` la variable `API_URL` si tu servidor no está en `http://localhost:4000`.
-
-12) Próximos pasos que puedo implementar
-
-- Rotación de `JWT_SECRET` y gestión de revocación de access tokens.
-- Generación de recibos PDF adjuntos a los emails.
-- Pruebas automatizadas más completas.
-
-Si quieres que aplique alguno de estos, dime cuál y lo implemento.
-
-Si quieres, puedo:
-- (A) ejecutar los comandos de instalación y generación aquí (requiere acceso a tu DB desde este entorno), o
-- (B) crear un script `npm run seed` con datos de ejemplo para `User`/`Agency`.
-
----
-Archivo añadido: [BJourneyGo-api/README.md](BJourneyGo-api/README.md)
-# BJourneyGo API (scaffold)
-
-Minimal scaffold for the BJourneyGo API using Fastify + TypeScript + Prisma (MySQL).
-
-Quick start
-
-1. Copy `.env.example` to `.env` and set `DATABASE_URL` and `JWT_SECRET`.
-2. Install:
-
-```bash
-npm install
-```
-
-3. Generate Prisma client and run migrations:
-
-```bash
-npm run prisma:generate
-npm run prisma:migrate
-```
-
-4. Run in dev:
-
-```bash
-npm run dev
-```
+- `JWT_SECRET environment variable is required`: falta JWT_SECRET en .env.
+- Error de conexion MySQL: valida DATABASE_URL, credenciales y servicio activo.
+- Emails no salen: revisa variables Mailjet/SMTP y MAIL_DISABLED.

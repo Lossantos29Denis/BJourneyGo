@@ -1,50 +1,131 @@
-# Welcome to your Expo app 👋
+# BJourneyGo Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicacion movil en Expo/React Native con Expo Router. Incluye flujos de autenticacion, compra, check-in y paneles operativos.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- Expo 54
+- React Native 0.81
+- Expo Router
+- AsyncStorage
 
-   ```bash
-   npm install
-   ```
+## Arquitectura
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```mermaid
+flowchart LR
+	App[Expo App] --> Router[Expo Router]
+	App --> APIClient[lib/api.tsx]
+	APIClient --> API[API principal]
+	App --> Storage[AsyncStorage]
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Requisitos
 
-## Learn more
+- Node.js 18+
+- npm
+- Expo Go o emulador Android/iOS
 
-To learn more about developing your project with Expo, look at the following resources:
+## Glosario y roles
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Orden: compra que agrupa billetes.
+- Billete: unidad emitida por pasajero.
+- Viaje: salida programada.
 
-## Join the community
+Roles oficiales:
 
-Join our community of developers creating universal apps.
+- ADMIN
+- AGENCY_ADMIN
+- AGENCY_WORKER
+- SCANNER
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Configuracion de entorno
+
+El API base se resuelve desde `extra.API_URL` en [app.json](app.json) o desde la variable de entorno API_URL.
+
+Ejemplo:
+
+- [BJourneyGo-develop/BJourneyGo-develop/.env.example](.env.example)
+
+```env
+API_URL=https://api.bjourneygo.me
+```
+
+## Instalacion
+
+```bash
+cd BJourneyGo-develop\BJourneyGo-develop
+npm install
+```
+
+## Ejecutar en desarrollo
+
+```bash
+npm run start
+```
+
+Comandos utiles:
+
+- `npm run android`
+- `npm run ios`
+- `npm run web`
+- `npm run lint`
+
+## Arquitectura
+
+- Rutas y pantallas en [app](app)
+- Navegacion raiz en [app/_layout.tsx](app/_layout.tsx)
+- Cliente API en [lib/api.tsx](lib/api.tsx)
+
+## Flujos clave
+
+- Login/registro y verificacion.
+- Compra de billetes y confirmacion.
+- Mis viajes y cambio de viaje.
+- Escaneo QR (modo scanner).
+
+## Flujos clave (detalle)
+
+- Autenticacion: login -> tokens -> refresh automatico.
+- Compra: seleccion de viaje -> pago -> confirmacion.
+- Mis viajes: listado de ordenes -> detalle -> cambio de viaje.
+- Scanner: inicio de sesion -> verificacion QR -> resultado.
+
+## Diagrama de secuencia (compra)
+
+```mermaid
+sequenceDiagram
+	participant U as Usuario
+	participant M as Mobile
+	participant A as API
+	participant S as Stripe
+
+	U->>M: Busca viaje y selecciona
+	M->>A: GET /trips
+	A-->>M: Lista de viajes
+	U->>M: Ingresa pasajeros
+	M->>A: POST /payments/stripe/checkout
+	A->>S: Crear session checkout
+	S-->>A: sessionId + url
+	A-->>M: url
+	M->>S: Checkout (webview/browser)
+	S-->>M: Pago confirmado
+	M->>A: POST /payments/stripe/confirm
+	A-->>M: Orden + billetes + QR
+	M-->>U: Confirmacion
+```
+
+## Notas de API_URL
+
+El cliente intenta resolver API_URL desde Expo extras o env, y adapta `localhost`:
+
+- En Expo, reemplaza `localhost` por el host real del debugger.
+- En Android emulator, reemplaza `localhost` por `10.0.2.2`.
+
+## Seguridad
+
+- Tokens en AsyncStorage.
+- Refresh automatico en llamadas protegidas.
+
+## Deep links
+
+El esquema registrado es `bjourneygo` en [app.json](app.json).
