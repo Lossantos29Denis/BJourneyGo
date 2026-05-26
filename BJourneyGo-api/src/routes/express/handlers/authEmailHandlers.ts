@@ -37,8 +37,11 @@ export function registerAuthEmailHandlers(router: Router) {
         const verifyLink = buildVerifyLink(verifyToken)
         if (!MAIL_DISABLED) {
           const tmpl = buildVerifyEmail(verifyLink)
-          mailer.sendMail({ to: user.email, subject: tmpl.subject, text: tmpl.text, html: tmpl.html })
-            .catch((e: any) => console.warn('Failed to send verification email', e))
+          try {
+            await mailer.sendMail({ to: user.email, subject: tmpl.subject, text: tmpl.text, html: tmpl.html })
+          } catch (e: any) {
+            console.warn('Failed to send verification email', { email: user.email, error: e?.message || e })
+          }
         }
 
         res.json({
@@ -173,8 +176,11 @@ export function registerAuthEmailHandlers(router: Router) {
       const verifyToken = jwt.sign({ jti, purpose: 'VERIFY_EMAIL' }, JWT_SECRET, { expiresIn: '24h' })
       const verifyLink = buildVerifyLink(verifyToken)
       const tmpl = buildVerifyEmail(verifyLink)
-      mailer.sendMail({ to: user.email, subject: tmpl.subject, text: tmpl.text, html: tmpl.html })
-        .catch((e: any) => console.warn('Failed to send resend-verify email', e))
+      try {
+        await mailer.sendMail({ to: user.email, subject: tmpl.subject, text: tmpl.text, html: tmpl.html })
+      } catch (e: any) {
+        console.warn('Failed to send resend-verify email', { email: user.email, error: e?.message || e })
+      }
 
       res.json({ success: true, verificationId: jti })
     } catch (e: any) {

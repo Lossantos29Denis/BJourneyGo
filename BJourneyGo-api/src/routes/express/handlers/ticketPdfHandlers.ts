@@ -16,14 +16,17 @@ export function registerTicketPdfHandlers(router: any) {
     try {
       const requestUserId = extractOptionalUserId(req)
 
+      const normalizedUuid = String(uuid).trim()
       const [rows]: any = await query(
-        `SELECT t.id, t.uuid, t.order_id AS orderId, t.trip_id AS tripId, t.passenger_name AS passengerName, t.passenger_identification AS passengerIdentification, t.passenger_phone AS passengerPhone, t.price, t.currency, t.qr_token AS qrToken, t.issued_at AS issuedAt, t.owner_user_id AS ownerUserId, tr.origin, tr.destination, tr.route_id AS routeId, tr.departure_at AS departureAt, tr.arrival_at AS arrivalAt, r.code AS routeCode
+        `SELECT t.id, t.uuid, t.order_id AS orderId, t.trip_id AS tripId, t.passenger_name AS passengerName, t.passenger_identification AS passengerIdentification, t.passenger_phone AS passengerPhone, t.price, COALESCE(o.currency, 'EUR') AS currency, t.qr_token AS qrToken, t.issued_at AS issuedAt, o.user_id AS ownerUserId, r.origin, r.destination, tr.route_id AS routeId, tr.departure_at AS departureAt, tr.arrival_at AS arrivalAt, r.code AS routeCode
          FROM \`Ticket\` t
-         JOIN \`Trip\` tr ON tr.id = t.trip_id
-         JOIN \`Route\` r ON r.id = tr.route_id
-         WHERE t.uuid = ?
+         LEFT JOIN \`Order\` o ON o.id = t.order_id
+         LEFT JOIN \`Trip\` tr ON tr.id = t.trip_id
+         LEFT JOIN \`Route\` r ON r.id = tr.route_id
+         WHERE LOWER(TRIM(t.uuid)) = LOWER(TRIM(?))
+            OR LOWER(COALESCE(t.qr_token, '')) LIKE CONCAT('%', LOWER(TRIM(?)), '%')
          LIMIT 1`,
-        [uuid]
+        [normalizedUuid, normalizedUuid]
       )
 
       const ticket = rows && rows[0]
@@ -124,7 +127,12 @@ export function registerTicketPdfHandlers(router: any) {
       }
 
       doc.end()
-      await new Promise<void>((resolve) => doc.on('end', resolve))
+      await new Promise<void>((resolve, reject) => {
+        doc.once('end', resolve)
+        doc.once('error', reject)
+        buf.once('error', reject)
+        buf.once('finish', resolve)
+      })
       const pdfBuffer = buf.getContents()
       if (!pdfBuffer) return res.status(500).json({ error: 'pdf generation failed' })
 

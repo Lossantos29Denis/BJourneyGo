@@ -9,7 +9,7 @@ API en Node.js + TypeScript para autenticacion, catalogo de viajes, ordenes, bil
 - MySQL (mysql2)
 - JWT
 - Stripe
-- Nodemailer o Mailjet
+- Resend y Nodemailer (fallback SMTP)
 
 ## Arquitectura
 
@@ -21,7 +21,7 @@ flowchart LR
 	Handlers --> Services[Services]
 	Services --> DB[(MySQL)]
 	Services --> Stripe[Stripe]
-	Services --> Mail[Mailjet/SMTP]
+	Services --> Mail[Resend/SMTP]
 	Express --> Uploads[/uploads]
 ```
 
@@ -59,16 +59,15 @@ PORT=4000
 WEB_URL=http://localhost:4321
 ```
 
-Correo (opcional):
+Correo con Resend (opcional):
 
 ```env
-MAILJET_API_KEY=...
-MAILJET_API_SECRET=...
-MAILJET_FROM_EMAIL=...
-MAILJET_FROM_NAME=BJourneyGo
+RESEND_API_KEY=...
+RESEND_FROM=no-reply@bjourneygo.me
+RESEND_FROM_NAME=BJourneyGo
 ```
 
-O SMTP (opcional):
+O SMTP (opcional, fallback local):
 
 ```env
 SMTP_HOST=...
@@ -76,7 +75,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=...
 SMTP_PASS=...
-SMTP_FROM="BJourneyGo <no-reply@bjourneygo.com>"
+SMTP_FROM=no-reply@bjourneygo.me
 SMTP_FROM_NAME=BJourneyGo
 ```
 
@@ -177,4 +176,4 @@ Los archivos subidos se sirven desde /uploads.
 
 - `JWT_SECRET environment variable is required`: falta JWT_SECRET en .env.
 - Error de conexion MySQL: valida DATABASE_URL, credenciales y servicio activo.
-- Emails no salen: revisa variables Mailjet/SMTP y MAIL_DISABLED.
+- Emails no salen: revisa variables Resend/SMTP y MAIL_DISABLED.

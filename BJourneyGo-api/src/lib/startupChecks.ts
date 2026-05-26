@@ -48,9 +48,9 @@ export async function runStartupChecks() {
     console.warn('Startup check: Could not list triggers (may lack privileges):', String(e))
   }
 
-  // Mailjet creds are optional — warn if mail usage expected
-  if (!process.env.MAILJET_API_KEY || !process.env.MAILJET_API_SECRET) {
-    console.warn('Startup check: Mailjet credentials not set. Email sending will be disabled or fail.')
+  // Resend creds are optional — warn if mail usage expected
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('Startup check: Resend API key not set. Email sending will be disabled or fail.')
   }
 
   console.log('Startup checks passed (with possible warnings).')
