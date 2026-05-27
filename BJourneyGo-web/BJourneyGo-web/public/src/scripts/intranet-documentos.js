@@ -185,6 +185,13 @@ function openNewModal() {
   document.getElementById('documentModalTitle').textContent = 'Nuevo documento'
   documentForm.reset()
   document.getElementById('documentId').value = ''
+  const categorySelect = document.getElementById('documentCategory')
+  if (categorySelect) {
+    const targetCategory = currentFilter === 'politicas' || currentFilter === 'manuales' || currentFilter === 'recursos'
+      ? currentFilter.toUpperCase()
+      : 'POLITICAS'
+    categorySelect.value = targetCategory
+  }
   documentModal.classList.add('active')
 }
 
