@@ -12,6 +12,14 @@ function formatDate(value) {
   return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function getDownloadUrl(doc) {
+  const raw = String(doc?.fileUrl || '').trim()
+  if (!raw) return ''
+  if (raw.startsWith('/uploads/')) return `/api${raw}`
+  if (raw.startsWith('uploads/')) return `/api/${raw}`
+  return raw
+}
+
 function mapCategory(category) {
   if (category === 'POLITICAS') return 'politicas'
   if (category === 'MANUALES') return 'manuales'
@@ -52,7 +60,7 @@ function renderDocuments(list) {
             <span class="doc-date">Actualizado: ${formatDate(doc.updatedAt)}</span>
             <span class="doc-size">${doc.fileSize || '-'}</span>
           </div>
-          ${doc.fileUrl ? `<a class="btn btn-primary doc-btn" href="${doc.fileUrl}" target="_blank" rel="noopener">Descargar</a>` : '<button class="btn btn-primary doc-btn" disabled>Sin archivo</button>'}
+          ${doc.fileUrl ? `<a class="btn btn-primary doc-btn" href="${getDownloadUrl(doc)}" target="_blank" rel="noopener">Descargar</a>` : '<button class="btn btn-primary doc-btn" disabled>Sin archivo</button>'}
         </div>
       `
     }).join('')

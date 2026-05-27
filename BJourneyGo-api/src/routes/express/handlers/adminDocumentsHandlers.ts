@@ -56,7 +56,7 @@ export function registerAdminDocumentsHandlers(router: Router) {
         return res.status(400).json({ error: 'file required' })
       }
       console.log('File uploaded successfully:', { filename: file.filename, size: file.size, path: file.path })
-        const fileUrl = `/uploads/documents/${file.filename}`
+        const fileUrl = `/api/uploads/documents/${file.filename}`
         const fileSize = formatFileSize(file.size)
         res.json({
           success: true,
