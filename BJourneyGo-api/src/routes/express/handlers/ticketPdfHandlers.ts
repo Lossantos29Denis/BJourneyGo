@@ -17,7 +17,7 @@ export function registerTicketPdfHandlers(router: any) {
       const requestUserId = extractOptionalUserId(req)
 
       const normalizedUuid = String(uuid).trim()
-      const [rows]: any = await query(
+      const rows: any = await query(
         `SELECT t.id, t.uuid, t.order_id AS orderId, t.trip_id AS tripId, t.passenger_name AS passengerName, t.passenger_identification AS passengerIdentification, t.passenger_phone AS passengerPhone, t.price, COALESCE(o.currency, 'EUR') AS currency, t.qr_token AS qrToken, t.issued_at AS issuedAt, o.user_id AS ownerUserId, r.origin, r.destination, tr.route_id AS routeId, tr.departure_at AS departureAt, tr.arrival_at AS arrivalAt, r.code AS routeCode
          FROM \`Ticket\` t
          LEFT JOIN \`Order\` o ON o.id = t.order_id
@@ -29,7 +29,7 @@ export function registerTicketPdfHandlers(router: any) {
         [normalizedUuid, normalizedUuid]
       )
 
-      const ticket = rows && rows[0]
+      const ticket = Array.isArray(rows) ? rows[0] : rows
       if (!ticket) {
         return res.status(404).json({ error: 'ticket not found' })
       }
